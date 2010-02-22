@@ -29,6 +29,7 @@ import java.io.File;
  * @version $Id$
  * @description Packages the Grails plugin.
  * @goal package-plugin
+ * @phase package
  * @requiresProject true
  * @requiresDependencyResolution runtime
  * @since 0.4

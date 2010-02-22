@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.grails</groupId>
   <artifactId>grails-maven-plugin</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <packaging>maven-plugin</packaging>
   <name>Maven plugin for GRAILS applications</name>
   <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
