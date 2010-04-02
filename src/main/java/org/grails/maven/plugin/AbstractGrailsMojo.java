@@ -198,6 +198,20 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         // First get the dependencies specified by the plugin.
         Set deps = getGrailsPluginDependencies();
 
+        // Add any system dependencies if necessary.
+        List systemDeps = new ArrayList();
+        try {
+            Iterator dependancies = this.project.getDependencies().iterator();
+            while (dependancies.hasNext()) {
+                Dependency dep = (Dependency) dependancies.next();
+                if (dep.getScope().equals("system")) {
+                    systemDeps.add(dep.getSystemPath());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         // Now add the project dependencies if necessary.
         if (includeProjectDeps) {
             deps.addAll(this.project.getRuntimeArtifacts());
@@ -205,10 +219,20 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
         URL[] classpath;
         try {
-            classpath = new URL[deps.size() + 1];
+            classpath = new URL[deps.size() + systemDeps.size() +1];
             int index = 0;
             for (Iterator iter = deps.iterator(); iter.hasNext();) {
                 classpath[index++] = ((Artifact) iter.next()).getFile().toURI().toURL();
+            }
+            //add paths to system dependencies to the classpath
+            for (Iterator iter = systemDeps.iterator(); iter.hasNext();) {
+                String path = (String) iter.next();
+                //If the path points to a non jar resource then include the path to the resource on the classpath
+                //An alternative would be to copy the non jar resource into target/resources.
+                if (!path.endsWith(".jar")) {
+                    path = path.substring(0, path.lastIndexOf("/"));
+                }
+                classpath[index++] = new File(path).toURI().toURL();
             }
 
             // Add the "tools.jar" to the classpath so that the Grails
@@ -223,7 +247,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 toolsJar = new File(javaHome, "tools.jar");
             }
             classpath[classpath.length - 1] = toolsJar.toURI().toURL();
-
             GrailsRootLoader rootLoader = new GrailsRootLoader(classpath, getClass().getClassLoader());
             GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, null, basedir.getAbsolutePath());
             configureBuildSettings(helper);
