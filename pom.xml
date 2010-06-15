@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.grails</groupId>
   <artifactId>grails-maven-plugin</artifactId>
-  <version>1.2.2</version>
+  <version>1.3.2</version>
   <packaging>maven-plugin</packaging>
   <name>Maven plugin for GRAILS applications</name>
   <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
@@ -32,6 +32,12 @@
       <releases>
         <enabled>false</enabled>
       </releases>
+    </repository>
+    <!-- necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
+     dependency on netty. Excludes don't work because grails-maven-plugin ignores them. -->
+    <repository>
+      <id>jboss</id>
+      <url>http://repository.jboss.com/maven2</url>
     </repository>
   </repositories>
   <distributionManagement>
@@ -96,15 +102,24 @@
     <dependency>
       <groupId>org.grails</groupId>
       <artifactId>grails-bootstrap</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.2</version>
     </dependency>
     <dependency>
       <groupId>org.grails</groupId>
       <artifactId>grails-scripts</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.2</version>
       <scope>runtime</scope>
     </dependency>
-
+    <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>1.6.8</version>
+    </dependency>        
+    <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjrt</artifactId>
+        <version>1.6.8</version>
+    </dependency>
     <!--
       Required by the "create-pom" goal because it contains the
       template POM for a Grails project.
@@ -112,7 +127,7 @@
     <dependency>
       <groupId>org.grails</groupId>
       <artifactId>grails-maven-archetype</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.2</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
