@@ -33,6 +33,10 @@
         <enabled>false</enabled>
       </releases>
     </repository>
+    <repository>
+      <id>Codehaus</id>
+      <url>http://repository.codehaus.org</url>
+    </repository>
     <!-- necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
      dependency on netty. Excludes don't work because grails-maven-plugin ignores them. -->
     <repository>
