@@ -25,7 +25,7 @@
         <type>grails-app</type>
         <packaging>grails-app</packaging>
         <language>java</language>
-        <addedToClasspath>true</addedToClasspath>
+        <addedToClasspath>false</addedToClasspath>
       </configuration>
     </component>
 

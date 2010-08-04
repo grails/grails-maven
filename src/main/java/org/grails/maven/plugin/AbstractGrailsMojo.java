@@ -247,7 +247,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 toolsJar = new File(javaHome, "tools.jar");
             }
             classpath[classpath.length - 1] = toolsJar.toURI().toURL();
-            GrailsRootLoader rootLoader = new GrailsRootLoader(classpath, getClass().getClassLoader());
+            GrailsRootLoader rootLoader = new GrailsRootLoader(classpath, ClassLoader.getSystemClassLoader());
             GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, null, basedir.getAbsolutePath());
             configureBuildSettings(helper);
 
@@ -257,7 +257,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             boolean metadataModified = false;
             for (Iterator iter = deps.iterator(); iter.hasNext();) {
                 Artifact dep = (Artifact) iter.next();
-                if (dep.getType() != null && dep.getType().equals("grails-plugin")) {
+                if (dep.getType() != null && (dep.getType().equals("grails-plugin") || dep.getType().equals("zip"))) {
                     metadataModified |= installGrailsPlugin(dep, metadata,  helper);
                 }
             }
@@ -416,8 +416,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             Artifact plugin,
             Metadata metadata,
             GrailsBuildHelper helper) throws IOException, ArchiverException {
-        String pluginName = plugin.getArtifactId().substring(PLUGIN_PREFIX.length());
+        String pluginName = plugin.getArtifactId();
         String pluginVersion = plugin.getVersion();
+
+        if (pluginName.startsWith(PLUGIN_PREFIX)) {
+            pluginName = pluginName.substring(PLUGIN_PREFIX.length());
+        }
+        getLog().info("Installing plugin " + pluginName + ":" + pluginVersion);
 
         // The directory the plugin will be unzipped to.
         File targetDir = new File(helper.getProjectPluginsDir(), pluginName + "-" + pluginVersion);
@@ -434,6 +439,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             unzipper.extract();
 
             // Now add it to the application metadata.
+            getLog().debug("Updating project metadata");
             metadata.setProperty("plugins." + pluginName, pluginVersion);
             return true;
         } else {

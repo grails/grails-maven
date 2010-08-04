@@ -61,6 +61,8 @@ public class GrailsPackagePluginMojo extends AbstractGrailsMojo {
         // Now move the ZIP from the project directory to the build
         // output directory.
         String zipFileName = project.getArtifactId() + "-" + project.getVersion() + ".zip";
+        if (!zipFileName.startsWith(PLUGIN_PREFIX)) zipFileName = PLUGIN_PREFIX + zipFileName;
+
         File zipGeneratedByGrails = new File(getBasedir(), zipFileName);
 
         File mavenZipFile = new File(project.getBuild().getDirectory(), zipFileName);

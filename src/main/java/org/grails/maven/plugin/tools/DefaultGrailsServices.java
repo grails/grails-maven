@@ -22,9 +22,12 @@ import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.groovy.grails.plugins.AstPluginDescriptorReader;
+import org.codehaus.groovy.grails.plugins.GrailsPluginInfo;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.springframework.core.io.FileSystemResource;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -250,29 +253,16 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         String pluginName = GrailsNameUtils.getScriptName(GrailsNameUtils.getLogicalName(className, "GrailsPlugin"));
         pluginProject.setPluginName(pluginName);
 
-        try {
-            GroovyClassLoader classLoader = new GroovyClassLoader();
-            Class clazz = classLoader.parseClass(descriptor);
-            Object instance = clazz.newInstance();
+        GroovyClassLoader classLoader = new GroovyClassLoader();
+        AstPluginDescriptorReader reader = new AstPluginDescriptorReader(classLoader);
+        GrailsPluginInfo info = reader.readPluginInfo(new FileSystemResource(descriptor));
+        String version = info.getVersion();
 
-            Object o = clazz.getMethod("getVersion", new Class[]{}).invoke(instance, new Object[]{});
-
-            if (o == null) {
-                throw new MojoExecutionException("getVersion() returned null!");
-            }
-
-            pluginProject.setVersion(o.toString());
-        } catch (IOException e) {
-            throw new MojoExecutionException("Error reading groovy file.", e);
-        } catch (InstantiationException e) {
-            throw new MojoExecutionException("Unable to create a new instance of the plugin configuration.", e);
-        } catch (NoSuchMethodException e) {
-            throw new MojoExecutionException("Unable to call getVersion() on the plugin configuration.", e);
-        } catch (InvocationTargetException e) {
-            throw new MojoExecutionException("Unable to call getVersion() on the plugin configuration.", e);
-        } catch (IllegalAccessException e) {
-            throw new MojoExecutionException("Unable to call getVersion() on the plugin configuration.", e);
+        if (version == null || version.trim().length() == 0) {
+            throw new MojoExecutionException("Plugin does not have a version!");
         }
+
+        pluginProject.setVersion(version);
         return pluginProject;
     }
 }
