@@ -18,6 +18,19 @@ package org.grails.maven.plugin;
 
 import grails.util.Metadata;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -39,13 +52,6 @@ import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.grails.maven.plugin.tools.GrailsServices;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.util.*;
 
 /**
  * Common services for all Mojos using Grails
@@ -153,38 +159,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return this.basedir;
     }
 
-    /**
-     * OutputStream to write the content of stdout.
-     */
-    private OutputStream infoOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLog().info(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
-    /**
-     * OutputStream to write the content of stderr.
-     */
-    private OutputStream warnOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLog().warn(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
     protected GrailsServices getGrailsServices() throws MojoExecutionException {
         grailsServices.setBasedir(basedir);
         return grailsServices;
@@ -221,7 +195,24 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         try {
             classpath = new URL[deps.size() + systemDeps.size() +1];
             int index = 0;
-            for (Iterator iter = deps.iterator(); iter.hasNext();) {
+            // See GRAILS-4969
+          	// patch markus.kramer@neofonie.de start
+            // make sure grails-bootstrap comes first
+          	Artifact[] sortedDeps = new Artifact[deps.size()];
+           	int i = 1;
+           	for (Iterator iter = deps.iterator(); iter.hasNext();) {
+           	    Artifact artifact = (Artifact) iter.next();
+           	    if ("org.grails".equals(artifact.getGroupId()) && "grails-bootstrap".equals(artifact.getArtifactId())) {
+           	        sortedDeps[0] = artifact;
+           	    } else {
+           	        sortedDeps[i] = artifact;
+           	        i++;
+          	    }
+           	}
+            
+           	for (Iterator iter = Arrays.asList(sortedDeps).iterator(); iter.hasNext();) {
+        		// patch markus.kramer@neofonie.de end
+        		// was: for (Iterator iter = deps.iterator(); iter.hasNext();) {
                 classpath[index++] = ((Artifact) iter.next()).getFile().toURI().toURL();
             }
             //add paths to system dependencies to the classpath
