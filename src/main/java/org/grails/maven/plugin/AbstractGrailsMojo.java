@@ -58,6 +58,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     public static final String PLUGIN_PREFIX = "grails-";
 
+    private static final String SYSTEM_SCOPE = "system";
+
     /**
      * The directory where is launched the mvn command.
      *
@@ -204,7 +206,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             Iterator dependancies = this.project.getDependencies().iterator();
             while (dependancies.hasNext()) {
                 Dependency dep = (Dependency) dependancies.next();
-                if (dep.getScope().equals("system")) {
+                if (SYSTEM_SCOPE.equals(dep.getScope())) {
                     systemDeps.add(dep.getSystemPath());
                 }
             }
