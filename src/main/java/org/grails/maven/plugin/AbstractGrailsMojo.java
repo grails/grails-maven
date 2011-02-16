@@ -93,6 +93,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected File pluginsDir;
 
     /**
+     * The path to the Grails installation.
+     *
+     * @parameter expression="${grailsHome}"
+     */
+    protected File grailsHome;
+
+    /**
      * POM
      *
      * @parameter expression="${project}"
@@ -213,7 +220,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         // Now add the project dependencies if necessary.
         if (includeProjectDeps) {
             deps.addAll(this.project.getRuntimeArtifacts());
@@ -250,7 +257,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             }
             classpath[classpath.length - 1] = toolsJar.toURI().toURL();
             GrailsRootLoader rootLoader = new GrailsRootLoader(classpath, ClassLoader.getSystemClassLoader());
-            GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, null, basedir.getAbsolutePath());
+            GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, (grailsHome != null) ? grailsHome.getAbsolutePath() : null, basedir.getAbsolutePath());
             configureBuildSettings(helper);
 
             // Search for all Grails plugin dependencies and install
