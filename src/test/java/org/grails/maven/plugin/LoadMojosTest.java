@@ -137,4 +137,8 @@ public class LoadMojosTest extends AbstractMojoTestCase {
     public void testLoadGrailsSetVersionMojoLookup() throws Exception {
         mojoTest("grails-set-version/plugin-config.xml", "set-version", GrailsSetVersionMojo.class);
     }
+    
+    public void testLoadGrailsUpgradeMojoLookup() throws Exception {
+        mojoTest("grails-upgrade/plugin-config.xml", "upgrade", GrailsUpgradeMojo.class);
+    }    
 }
