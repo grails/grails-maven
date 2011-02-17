@@ -93,6 +93,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected File pluginsDir;
 
     /**
+     * The path to the Grails installation.
+     *
+     * @parameter expression="${grailsHome}"
+     */
+    protected File grailsHome;
+
+    /**
      * POM
      *
      * @parameter expression="${project}"
@@ -213,7 +220,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         // Now add the project dependencies if necessary.
         if (includeProjectDeps) {
             deps.addAll(this.project.getRuntimeArtifacts());
@@ -250,7 +257,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             }
             classpath[classpath.length - 1] = toolsJar.toURI().toURL();
             GrailsRootLoader rootLoader = new GrailsRootLoader(classpath, ClassLoader.getSystemClassLoader());
-            GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, null, basedir.getAbsolutePath());
+            GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, (grailsHome != null) ? grailsHome.getAbsolutePath() : null, basedir.getAbsolutePath());
             configureBuildSettings(helper);
 
             // Search for all Grails plugin dependencies and install
@@ -348,9 +355,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             InstantiationException, MojoExecutionException, NoSuchMethodException, InvocationTargetException {
         String targetDir = this.project.getBuild().getDirectory();
         helper.setDependenciesExternallyConfigured(true);
-        helper.setCompileDependencies(artifactsToFiles(this.project.getCompileArtifacts()));
-        helper.setTestDependencies(artifactsToFiles(this.project.getTestArtifacts()));
-        helper.setRuntimeDependencies(artifactsToFiles(this.project.getRuntimeArtifacts()));
+        helper.setCompileDependencies(artifactsToFiles(removePluginDependencies(this.project.getCompileArtifacts())));
+        helper.setTestDependencies(artifactsToFiles(removePluginDependencies(this.project.getTestArtifacts())));
+        helper.setRuntimeDependencies(artifactsToFiles(removePluginDependencies(this.project.getRuntimeArtifacts())));
         helper.setProjectWorkDir(new File(targetDir));
         helper.setClassesDir(new File(targetDir, "classes"));
         helper.setTestClassesDir(new File(targetDir, "test-classes"));
@@ -515,5 +522,25 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 dep.getArtifactId(),
                 dep.getVersion(),
                 "pom");
+    }
+    
+    /**
+     * Removes any Grails plugin dependencies from the supplied list
+     * of dependencies.  A Grails plugin is any dependency whose type
+     * is equal to "grails-plugin" or "zip".
+     * @param dependencies The list of dependencies to be cleansed.
+     * @return The cleansed list of dependencies with all Grails plugin 
+     *   dependencies removed.
+     */
+    private List removePluginDependencies(final List dependencies) {
+    	if(dependencies != null) {
+            for (final Iterator iter = dependencies.iterator(); iter.hasNext();) {
+                final Artifact dep = (Artifact) iter.next();
+                if (dep.getType() != null && (dep.getType().equals("grails-plugin") || dep.getType().equals("zip"))) {
+                	iter.remove();
+                }
+            }
+    	}
+    	return dependencies;
     }
 }

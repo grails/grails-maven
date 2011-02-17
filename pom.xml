@@ -63,6 +63,7 @@
     <maven-pmd-plugin.version>2.2</maven-pmd-plugin.version>
     <findbugs-maven-plugin.version>1.1.1</findbugs-maven-plugin.version>
     <rat-maven-plugin.version>1.0-alpha-3</rat-maven-plugin.version>
+    <cobertura-maven-plugin.version>2.4</cobertura-maven-plugin.version>
   </properties>
   
   <prerequisites>
@@ -311,6 +312,18 @@
       <plugin>
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>${maven-surefire-report-plugin.version}</version>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>${cobertura-maven-plugin.version}</version>        
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+        </configuration>        
       </plugin>
       
       <plugin>
