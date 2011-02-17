@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.grails</groupId>
   <artifactId>grails-maven-plugin</artifactId>
-  <version>1.3.6</version>
+  <version>1.3.7</version>
   <packaging>maven-plugin</packaging>
   
   <name>Maven plugin for GRAILS applications</name>
@@ -32,7 +32,7 @@
     <maven.version>2.0.5</maven.version>
     
     <!-- Dependencies -->
-    <grails.version>1.3.6</grails.version>
+    <grails.version>1.3.7</grails.version>
     <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
     <grails-core.version>${grails.version}</grails-core.version>
     <grails-scripts.version>${grails.version}</grails-scripts.version>
@@ -44,7 +44,7 @@
     <maven-archiver.version>2.2</maven-archiver.version>
     <plexus-utils.version>1.4.5</plexus-utils.version>
     <junit.version>3.8.2</junit.version>
-    <spring.version>3.0.3.RELEASE</spring.version>
+    <spring.version>3.0.5.RELEASE</spring.version>
     <slf4j.version>1.5.8</slf4j.version>
     <maven-plugin-testing-harness.version>1.1</maven-plugin-testing-harness.version>
     <xmlunit.version>1.0</xmlunit.version>
