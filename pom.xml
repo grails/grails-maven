@@ -499,21 +499,13 @@
       dependency on netty. Excludes don't work because grails-maven-plugin ignores them.
     -->
     <repository>
-      <id>jboss</id>
-      <url>https://repository.jboss.org/nexus/content/groups/public</url>
+      <id>grails</id>
+      <url>http://repo.grails.org/grails/core</url>
     </repository>
 
     <repository>
       <id>spring-roo</id>
       <url>http://spring-roo-repository.springsource.org.s3.amazonaws.com/release</url>
-    </repository>
-    <repository>
-      <id>spring-snapshot</id>
-      <url>http://maven.springframework.org/snapshot</url>
-    </repository>
-    <repository>
-      <id>spring-milestone</id>
-      <url>http://maven.springframework.org/milestone</url>
     </repository>
   </repositories>
   
