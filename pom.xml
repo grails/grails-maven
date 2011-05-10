@@ -478,22 +478,6 @@
   </profiles>
   
   <repositories>
-    <repository>
-      <id>Codehaus Snapshots</id>
-      <url>http://snapshots.repository.codehaus.org</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    
-    <repository>
-      <id>Codehaus</id>
-      <url>http://repository.codehaus.org</url>
-    </repository>
-    
     <!--
       Necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
       dependency on netty. Excludes don't work because grails-maven-plugin ignores them.
