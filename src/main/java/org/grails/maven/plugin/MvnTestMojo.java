@@ -50,6 +50,14 @@ public class MvnTestMojo extends AbstractGrailsMojo {
      */
     private Boolean mavenSkip;
 
+    /**
+ 	* Set this to "true" to ignore a failure during testing. Its use is NOT RECOMMENDED, but quite convenient on
+ 	* occasion.
+ 	*
+ 	* @parameter default-value="false" expression="${maven.test.failure.ignore}"
+ 	*/
+ 	private boolean testFailureIgnore;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             return;
@@ -73,6 +81,12 @@ public class MvnTestMojo extends AbstractGrailsMojo {
             }
         }
 
-        runGrails("TestApp", "--unit --integration", true);
+        try {
+            runGrails("TestApp", "--unit --integration", true);
+        } catch (MojoExecutionException me) {
+            if (!testFailureIgnore) {
+                throw me;
+            }
+        }
     }
 }
