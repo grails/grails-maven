@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright 2007 the original author or authors.
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-  
+
   http://www.apache.org/licenses/LICENSE-2.0
-  
+
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,22 +22,22 @@
   <artifactId>grails-maven-plugin</artifactId>
   <version>1.4.0.BUILD-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
-  
+
   <name>Maven plugin for GRAILS applications</name>
   <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
   <url>http://github.com/grails/grails-maven</url>
-  
+
   <properties>
     <!-- Prerequisites -->
     <maven.version>2.0.5</maven.version>
-    
+
     <!-- Dependencies -->
     <grails.version>1.4.0.BUILD-SNAPSHOT</grails.version>
     <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
     <grails-core.version>${grails.version}</grails-core.version>
     <grails-scripts.version>${grails.version}</grails-scripts.version>
     <grails-maven-archetype.version>${grails.version}</grails-maven-archetype.version>
-    
+
     <maven-model.version>2.0.7</maven-model.version>
     <maven-project.version>2.0.7</maven-project.version>
     <maven-plugin-api.version>2.0.7</maven-plugin-api.version>
@@ -50,7 +50,7 @@
     <xmlunit.version>1.0</xmlunit.version>
     <aspectjweaver.version>1.6.8</aspectjweaver.version>
     <aspectjrt.version>1.6.8</aspectjrt.version>
-    
+
     <!-- Reporting plugins -->
     <maven-project-info-reports-plugin.version>2.0.1</maven-project-info-reports-plugin.version>
     <maven-plugin-plugin.version>2.4.1</maven-plugin-plugin.version>
@@ -65,18 +65,18 @@
     <rat-maven-plugin.version>1.0-alpha-3</rat-maven-plugin.version>
     <cobertura-maven-plugin.version>2.4</cobertura-maven-plugin.version>
   </properties>
-  
+
   <prerequisites>
     <maven>${maven.version}</maven>
   </prerequisites>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.grails</groupId>
       <artifactId>grails-bootstrap</artifactId>
       <version>${grails-bootstrap.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.grails</groupId>
       <artifactId>grails-core</artifactId>
@@ -84,12 +84,11 @@
     </dependency>
 
     <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-scripts</artifactId>
-      <version>${grails-scripts.version}</version>
-      <scope>runtime</scope>
+        <groupId>org.grails</groupId>
+        <artifactId>grails-exec</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </dependency>
-    
+
     <!--
       Required by the "create-pom" goal because it contains the
       template POM for a Grails project.
@@ -100,58 +99,58 @@
       <version>${grails-maven-archetype.version}</version>
       <scope>runtime</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-model</artifactId>
       <version>${maven-model.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-project</artifactId>
       <version>${maven-project.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>${maven-plugin-api.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-archiver</artifactId>
       <version>${maven-archiver.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
       <version>${plexus-utils.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-plugin-testing-harness</artifactId>
       <version>${maven-plugin-testing-harness.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
       <version>${xmlunit.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
@@ -177,7 +176,7 @@
         <scope>runtime</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -192,7 +191,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-maven-plugin</artifactId>
@@ -207,7 +206,7 @@
               <outputDirectory>${project.build.directory}/generated-resources/plexus</outputDirectory>
             </configuration>
           </execution>
-          
+
           <execution>
             <id>merge</id>
             <goals>
@@ -221,7 +220,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-docck-plugin</artifactId>
@@ -236,25 +235,25 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <reporting>
     <plugins>
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>${maven-project-info-reports-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
         <version>${maven-plugin-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-maven-plugin</artifactId>
         <version>${plexus-maven-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
@@ -265,31 +264,31 @@
               <placement>a</placement>
               <head>This class is a plexus component</head>
             </tag>
-            
+
             <tag>
               <name>component</name>
               <placement>a</placement>
               <head>This property is a component injected by plexus.</head>
             </tag>
-            
+
             <tag>
               <name>readonly</name>
               <placement>a</placement>
               <head>The user cannot override this property from the command line.</head>
             </tag>
-            
+
             <tag>
               <name>description</name>
               <placement>a</placement>
               <head>Description :</head>
             </tag>
-            
+
             <tag>
               <name>requiresProject</name>
               <placement>a</placement>
               <head>This Mojo needs to be launched in a maven 2 project</head>
             </tag>
-            
+
             <tag>
               <name>goal</name>
               <placement>a</placement>
@@ -298,39 +297,39 @@
           </tags>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-jxr-plugin</artifactId>
         <version>${maven-jxr-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-changelog-plugin</artifactId>
         <version>${maven-changelog-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>${maven-surefire-report-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-        <version>${cobertura-maven-plugin.version}</version>        
+        <version>${cobertura-maven-plugin.version}</version>
         <configuration>
           <formats>
             <format>html</format>
             <format>xml</format>
           </formats>
-        </configuration>        
+        </configuration>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${maven-checkstyle-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${maven-pmd-plugin.version}</version>
@@ -340,13 +339,13 @@
           <targetJdk>1.4</targetJdk>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>${findbugs-maven-plugin.version}</version>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>rat-maven-plugin</artifactId>
@@ -359,18 +358,18 @@
       </plugin>
     </plugins>
   </reporting>
-  
+
   <profiles>
     <profile>
       <id>integration-tests</id>
-      
+
       <activation>
         <property>
           <name>integration-tests</name>
           <value>true</value>
         </property>
       </activation>
-      
+
       <build>
         <plugins>
           <plugin>
@@ -404,7 +403,7 @@
           </plugin>
         </plugins>
       </build>
-      
+
       <repositories>
         <repository>
           <releases>
@@ -414,7 +413,7 @@
           <url>http://snapshots.repository.codehaus.org/</url>
         </repository>
       </repositories>
-      
+
       <pluginRepositories>
         <pluginRepository>
           <releases>
@@ -429,10 +428,10 @@
         <excludeITs>**/run-webtest/pom4test.xml</excludeITs>
       </properties>
     </profile>
-    
+
     <profile>
       <id>release</id>
-      
+
       <build>
         <plugins>
           <plugin>
@@ -447,7 +446,7 @@
               </execution>
             </executions>
           </plugin>
-          
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -476,7 +475,7 @@
       </build>
     </profile>
   </profiles>
-  
+
   <repositories>
     <!--
       Necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
@@ -492,14 +491,14 @@
       <url>http://spring-roo-repository.springsource.org.s3.amazonaws.com/release</url>
     </repository>
   </repositories>
-  
+
   <distributionManagement>
     <repository>
       <id>codehaus.org</id>
       <name>Grails Main Repository</name>
       <url>dav:https://dav.codehaus.org/repository/grails</url>
     </repository>
-    
+
     <snapshotRepository>
       <id>codehaus.org</id>
       <name>Grails Snapshots Repository</name>
