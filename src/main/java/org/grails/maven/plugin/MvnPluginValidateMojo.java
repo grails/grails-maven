@@ -16,7 +16,6 @@
 package org.grails.maven.plugin;
 
 import org.grails.maven.plugin.tools.GrailsPluginProject;
-import org.grails.maven.plugin.tools.GrailsProject;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 

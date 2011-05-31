@@ -143,6 +143,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @required
      * @readonly
      */
+    @SuppressWarnings("rawtypes")
     private List remoteRepositories;
 
     /**
@@ -163,8 +164,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * OutputStream to write the content of stdout.
      */
+    @SuppressWarnings("unused")
     private OutputStream infoOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         public void write(int b) throws IOException {
             if (b == '\n') {
@@ -179,8 +181,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * OutputStream to write the content of stderr.
      */
+    @SuppressWarnings("unused")
     private OutputStream warnOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         public void write(int b) throws IOException {
             if (b == '\n') {
@@ -205,7 +208,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         try {
             // Get the transitive set of dependencies for this project, including
             // any dependencies of Grails plugins referenced via Maven.
-            final Set projectDependencies = getGrailsProjectDependencies();
+            final Set<Artifact> projectDependencies = getGrailsProjectDependencies();
             GrailsRootLoader rootLoader = new GrailsRootLoader(buildGrailsClasspath(projectDependencies), ClassLoader.getSystemClassLoader());
             GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, (grailsHome != null) ? grailsHome.getAbsolutePath() : null, basedir.getAbsolutePath());
             configureBuildSettings(helper);
@@ -244,8 +247,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @return The set of unique and resolved artifacts required for this execution.
      * @throws MojoExecutionException
      */
-    private Set getGrailsProjectDependencies() throws MojoExecutionException {
-        final Set resolvedArtifacts = new HashSet();
+    @SuppressWarnings("unchecked")
+    private Set<Artifact> getGrailsProjectDependencies() throws MojoExecutionException {
+        final Set<Artifact> resolvedArtifacts = new HashSet<Artifact>();
         final ArtifactResolutionResult result = retrieveProjectDependencies();
         if(result != null) {
             resolvedArtifacts.addAll(resolveArtifacts(result.getArtifacts()));
@@ -266,7 +270,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     private ArtifactResolutionResult retrieveProjectDependencies() throws MojoExecutionException {
         // Create Maven Artifacts for each direct project dependency
-        final Set dependencyArtifacts = createMavenArtifactsForDependencies(project.getDependencies());
+        final Set<Artifact> dependencyArtifacts = createMavenArtifactsForDependencies(project.getDependencies());
 
         // Collect all of the transitive dependencies of this project
         return collectTransitiveMavenArtifactsForDependencies(dependencyArtifacts, project.getArtifact());
@@ -278,8 +282,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @return A set of Maven artifacts (guaranteed to be non-null).
      * @throws MojoExecutionException
      */
-    private Set createMavenArtifactsForDependencies(final List dependencies) throws MojoExecutionException {
-        final Set dependencyArtifacts = new HashSet();
+    @SuppressWarnings("unchecked")
+    private Set<Artifact> createMavenArtifactsForDependencies(final List<?> dependencies) throws MojoExecutionException {
+        final Set<Artifact> dependencyArtifacts = new HashSet<Artifact>();
         try {
             // Create Maven Artifacts for each direct project dependency
             dependencyArtifacts.addAll(MavenMetadataSource.createArtifacts(artifactFactory, dependencies, null, null, null));
@@ -300,7 +305,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @return A result object containing the dependencies if found.
      * @throws MojoExecutionException
      */
-    private ArtifactResolutionResult collectTransitiveMavenArtifactsForDependencies(final Set dependencyArtifacts, final Artifact originatingArtifact) throws MojoExecutionException {
+    private ArtifactResolutionResult collectTransitiveMavenArtifactsForDependencies(final Set<Artifact> dependencyArtifacts, final Artifact originatingArtifact) throws MojoExecutionException {
         ArtifactResolutionResult result = new ArtifactResolutionResult();
         try {
             result = artifactCollector.collect(
@@ -327,12 +332,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      *  dependency artifacts to resolve.
      * @throws MojoExecutionException
      */
-    private List resolveArtifacts(final Set transitiveArtifacts) throws MojoExecutionException {
-        final List resolvedArtifacts = new ArrayList();
+    private List<Artifact> resolveArtifacts(final Set<Artifact> transitiveArtifacts) throws MojoExecutionException {
+        final List<Artifact> resolvedArtifacts = new ArrayList<Artifact>();
 
-        for(Iterator iter = transitiveArtifacts.iterator(); iter.hasNext();) {
-            final Artifact artifact = (Artifact) iter.next();
-
+        for(final Artifact artifact: transitiveArtifacts) {
             try {
                 // Find the artifact(s) that we wish to resolve.
                 if( artifact != null) {
@@ -350,6 +353,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return resolvedArtifacts;
     }
 
+    @SuppressWarnings("unchecked")
     private void configureBuildSettings(GrailsBuildHelper helper)
             throws ClassNotFoundException, IllegalAccessException,
             InstantiationException, MojoExecutionException, NoSuchMethodException, InvocationTargetException {
@@ -417,10 +421,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
-    private List artifactsToFiles(Collection artifacts) {
-        List files = new ArrayList(artifacts.size());
-        for (Iterator iter = artifacts.iterator(); iter.hasNext();) {
-            files.add(((Artifact) iter.next()).getFile());
+    private List<File> artifactsToFiles(Collection<Artifact> artifacts) {
+        final List<File> files = new ArrayList<File>(artifacts.size());
+        for (final Artifact artifact : artifacts) {
+            files.add(artifact.getFile());
         }
 
         return files;
@@ -434,15 +438,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @return An array of dependency file URL's that will represent the classpath.
      * @throws MalformedURLException
      */
-    private URL[] buildGrailsClasspath(final Set projectDependencies) throws MalformedURLException {
+    private URL[] buildGrailsClasspath(final Set<Artifact> projectDependencies) throws MalformedURLException {
         // Add 1 to the size to account for the tools.jar dependency.
         final URL[] classpath = new URL[projectDependencies.size() + 1];
         int index = 0;
 
         //add paths to dependencies to the classpath
-        for (Iterator iter = projectDependencies.iterator(); iter.hasNext();) {
-            final Artifact artifact = (Artifact) iter.next();
-
+        for (final Artifact artifact : projectDependencies) {
             // System scoped dependencies require a little extra TLC to get them on to the classpath.
             if(Artifact.SCOPE_SYSTEM.equals(artifact.getScope())) {
                 String path = artifact.getFile().getPath();
@@ -479,16 +481,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws IOException
      * @throws ArchiverException
      */
-    private void installGrailsPlugins(final Set projectDependencies, final GrailsBuildHelper helper) throws IOException, ArchiverException {
+    private void installGrailsPlugins(final Set<Artifact> projectDependencies, final GrailsBuildHelper helper) throws IOException, ArchiverException {
         // Search for all Grails plugin dependencies and install
         // any that haven't already been installed.
         Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
         boolean metadataModified = false;
 
-        for (Iterator iter = projectDependencies.iterator(); iter.hasNext();) {
-            Artifact dep = (Artifact) iter.next();
-            if (dep.getType() != null && (dep.getType().equals(GRAILS_PLUGIN_TYPE) || dep.getType().equals("zip"))) {
-                metadataModified |= installGrailsPlugin(dep, metadata,  helper);
+        for (final Artifact artifact : projectDependencies) {
+            if (artifact.getType() != null && (artifact.getType().equals(GRAILS_PLUGIN_TYPE) || artifact.getType().equals("zip"))) {
+                metadataModified |= installGrailsPlugin(artifact, metadata,  helper);
             }
         }
 
@@ -505,9 +506,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @return The cleansed list of dependencies with all Grails plugin
      *   dependencies removed.
      */
-    private List removePluginDependencies(final List dependencies) {
+    private List<Artifact> removePluginDependencies(final List<Artifact> dependencies) {
         if(dependencies != null) {
-            for (final Iterator iter = dependencies.iterator(); iter.hasNext();) {
+            for (final Iterator<Artifact> iter = dependencies.iterator(); iter.hasNext();) {
                 final Artifact dep = (Artifact) iter.next();
                 if (dep.getType() != null && (dep.getType().equals(GRAILS_PLUGIN_TYPE) || dep.getType().equals("zip"))) {
                     iter.remove();

@@ -75,7 +75,7 @@ public class CreatePomMojo extends AbstractMojo {
         grailsServices.setBasedir(basedir);
         GrailsProject grailsDescr = grailsServices.readProjectDescriptor();
 
-        Map varSubstitutions = new HashMap();
+        final Map<String, String> varSubstitutions = new HashMap<String, String>();
         varSubstitutions.put("groupId", groupId);
         varSubstitutions.put("artifactId", grailsDescr.getAppName());
         varSubstitutions.put("version", grailsDescr.getAppVersion());

@@ -18,8 +18,6 @@ package org.grails.maven.plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import java.io.File;
-
 /**
  * Validate consistency between Grails and Maven settings.
  *

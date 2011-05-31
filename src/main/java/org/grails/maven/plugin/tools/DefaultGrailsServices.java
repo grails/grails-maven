@@ -30,7 +30,6 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.springframework.core.io.FileSystemResource;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -46,13 +45,16 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     private static final String FILE_SUFFIX = "GrailsPlugin.groovy";
 
     private File _basedir;
+
+    @SuppressWarnings({ "rawtypes", "unused" })
     private List _dependencyPaths;
 
     /**
      * OutputStream to write the content of stdout.
      */
+    @SuppressWarnings("unused")
     private OutputStream infoOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         public void write(int b) throws IOException {
             if (b == '\n') {
@@ -67,8 +69,9 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     /**
      * OutputStream to write the content of stderr.
      */
+    @SuppressWarnings("unused")
     private OutputStream warnOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         public void write(int b) throws IOException {
             if (b == '\n') {
