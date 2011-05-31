@@ -3,3 +3,6 @@ grails-maven-plugin.ipr
 grails-maven-plugin.iws
 META-INF
 target
+.classpath
+.project
+.settings
