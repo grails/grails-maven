@@ -15,7 +15,6 @@
  */
 package org.grails.maven.plugin;
 
-import org.grails.maven.plugin.tools.GrailsPluginProject;
 import org.grails.maven.plugin.tools.GrailsProject;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -59,7 +58,7 @@ public class MvnValidateMojo extends AbstractGrailsMojo {
             getLog().info("No Grails application found - skipping validation.");
             return;
         }
-        
+
         if (!artifactId.equals(grailsProject.getAppName())) {
             throw new MojoFailureException("app.name [" + grailsProject.getAppName() + "] in " +
                 "application.properties is different of the artifactId [" + artifactId + "] in the pom.xml");
@@ -73,7 +72,7 @@ public class MvnValidateMojo extends AbstractGrailsMojo {
 
             getGrailsServices().writeProjectDescriptor(getBasedir(), grailsProject);
         }
-        
+
         String pomVersion = version.trim();
         String grailsVersion = grailsProject.getAppVersion().trim();
 

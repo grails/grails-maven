@@ -32,12 +32,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.artifact.InvalidDependencyVersionException;
 import org.apache.maven.project.artifact.MavenMetadataSource;
-import org.codehaus.groovy.grails.cli.support.GrailsBuildHelper;
-import org.codehaus.groovy.grails.cli.support.GrailsRootLoader;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.grails.launcher.GrailsLauncher;
+import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.tools.GrailsServices;
 
 import java.io.File;
@@ -209,13 +209,20 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // Get the transitive set of dependencies for this project, including
             // any dependencies of Grails plugins referenced via Maven.
             final Set<Artifact> projectDependencies = getGrailsProjectDependencies();
-            GrailsRootLoader rootLoader = new GrailsRootLoader(buildGrailsClasspath(projectDependencies), ClassLoader.getSystemClassLoader());
-            GrailsBuildHelper helper = new GrailsBuildHelper(rootLoader, (grailsHome != null) ? grailsHome.getAbsolutePath() : null, basedir.getAbsolutePath());
-            configureBuildSettings(helper);
+            // Convert the Grails Home argument from a File to a String, if present.
+            String grailsHomePath = null;
+            if(grailsHome != null) {
+                grailsHomePath = grailsHome.getPath();
+            }
+
+            // Set up the Grails executor to run the requested target.
+            final RootLoader classloader = new RootLoader(buildGrailsClasspath(projectDependencies), ClassLoader.getSystemClassLoader());
+            final GrailsLauncher launcher = new GrailsLauncher(classloader, grailsHomePath, basedir.getPath());
+            configureBuildSettings(launcher);
 
             // Search for all Grails plugin dependencies and install
             // any that haven't already been installed.
-            installGrailsPlugins(projectDependencies, helper);
+            installGrailsPlugins(projectDependencies, launcher);
 
             // Un-comment following three lines to set output stream for debugging
 //            mainClass.getDeclaredMethod("setOut", new Class[]{ PrintStream.class }).invoke(
@@ -228,7 +235,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 args = args == null ? "--non-interactive" : "--non-interactive " + args;
             }
 
-            int retval = helper.execute(targetName, args, env);
+            int retval = launcher.launch(targetName, args, env);
             if (retval != 0) {
                 throw new MojoExecutionException("Grails returned non-zero value: " + retval);
             }
@@ -354,19 +361,19 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     }
 
     @SuppressWarnings("unchecked")
-    private void configureBuildSettings(GrailsBuildHelper helper)
+    private void configureBuildSettings(final GrailsLauncher launcher)
             throws ClassNotFoundException, IllegalAccessException,
             InstantiationException, MojoExecutionException, NoSuchMethodException, InvocationTargetException {
         String targetDir = this.project.getBuild().getDirectory();
-        helper.setDependenciesExternallyConfigured(true);
-        helper.setCompileDependencies(artifactsToFiles(removePluginDependencies(this.project.getCompileArtifacts())));
-        helper.setTestDependencies(artifactsToFiles(removePluginDependencies(this.project.getTestArtifacts())));
-        helper.setRuntimeDependencies(artifactsToFiles(removePluginDependencies(this.project.getRuntimeArtifacts())));
-        helper.setProjectWorkDir(new File(targetDir));
-        helper.setClassesDir(new File(targetDir, "classes"));
-        helper.setTestClassesDir(new File(targetDir, "test-classes"));
-        helper.setResourcesDir(new File(targetDir, "resources"));
-        helper.setProjectPluginsDir(this.pluginsDir);
+        launcher.setDependenciesExternallyConfigured(true);
+        launcher.setCompileDependencies(artifactsToFiles(removePluginDependencies(this.project.getCompileArtifacts())));
+        launcher.setTestDependencies(artifactsToFiles(removePluginDependencies(this.project.getTestArtifacts())));
+        launcher.setRuntimeDependencies(artifactsToFiles(removePluginDependencies(this.project.getRuntimeArtifacts())));
+        launcher.setProjectWorkDir(new File(targetDir));
+        launcher.setClassesDir(new File(targetDir, "classes"));
+        launcher.setTestClassesDir(new File(targetDir, "test-classes"));
+        launcher.setResourcesDir(new File(targetDir, "resources"));
+        launcher.setProjectPluginsDir(this.pluginsDir);
     }
 
     /**
@@ -377,7 +384,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @param plugin The plugin artifact to install.
      * @param metadata The application metadata. An entry for the plugin
      * is added to this if the installation is successful.
-     * @param helper The helper instance that contains information about
+     * @param launcher The launcher instance that contains information about
      * the various project directories. In particular, this is where the
      * method gets the location of the project's "plugins" directory
      * from.
@@ -387,11 +394,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws ArchiverException
      */
     private boolean installGrailsPlugin(
-            Artifact plugin,
-            Metadata metadata,
-            GrailsBuildHelper helper) throws IOException, ArchiverException {
+            final Artifact plugin,
+            final Metadata metadata,
+            final GrailsLauncher launcher) throws IOException, ArchiverException {
         String pluginName = plugin.getArtifactId();
-        String pluginVersion = plugin.getVersion();
+        final String pluginVersion = plugin.getVersion();
 
         if (pluginName.startsWith(PLUGIN_PREFIX)) {
             pluginName = pluginName.substring(PLUGIN_PREFIX.length());
@@ -399,13 +406,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         getLog().info("Installing plugin " + pluginName + ":" + pluginVersion);
 
         // The directory the plugin will be unzipped to.
-        File targetDir = new File(helper.getProjectPluginsDir(), pluginName + "-" + pluginVersion);
+        final File targetDir = new File(launcher.getProjectPluginsDir(), pluginName + "-" + pluginVersion);
 
         // Unpack the plugin if it hasn't already been.
         if (!targetDir.exists()) {
             targetDir.mkdirs();
 
-            ZipUnArchiver unzipper = new ZipUnArchiver();
+            final ZipUnArchiver unzipper = new ZipUnArchiver();
             unzipper.enableLogging(new ConsoleLogger(Logger.LEVEL_ERROR, "zip-unarchiver"));
             unzipper.setSourceFile(plugin.getFile());
             unzipper.setDestDirectory(targetDir);
@@ -477,11 +484,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * Installs all of the Grails plugins found within the Maven dependencies for this project.
      * @param projectDependencies The resolved dependency set for this project.
-     * @param helper The GrailsBuildHelper environment executor.
+     * @param launcher The GrailsLauncher environment launcher.
      * @throws IOException
      * @throws ArchiverException
      */
-    private void installGrailsPlugins(final Set<Artifact> projectDependencies, final GrailsBuildHelper helper) throws IOException, ArchiverException {
+    private void installGrailsPlugins(final Set<Artifact> projectDependencies, final GrailsLauncher launcher) throws IOException, ArchiverException {
         // Search for all Grails plugin dependencies and install
         // any that haven't already been installed.
         Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
@@ -489,7 +496,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
         for (final Artifact artifact : projectDependencies) {
             if (artifact.getType() != null && (artifact.getType().equals(GRAILS_PLUGIN_TYPE) || artifact.getType().equals("zip"))) {
-                metadataModified |= installGrailsPlugin(artifact, metadata,  helper);
+                metadataModified |= installGrailsPlugin(artifact, metadata,  launcher);
             }
         }
 
