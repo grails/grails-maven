@@ -48,38 +48,6 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     private File _basedir;
     private List _dependencyPaths;
 
-    /**
-     * OutputStream to write the content of stdout.
-     */
-    private OutputStream infoOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLogger().info(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
-    /**
-     * OutputStream to write the content of stderr.
-     */
-    private OutputStream warnOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLogger().warn(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
     private File getBasedir() {
         if (_basedir != null) {
             return _basedir;

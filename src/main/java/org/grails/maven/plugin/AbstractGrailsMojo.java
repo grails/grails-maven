@@ -162,38 +162,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return this.basedir;
     }
 
-    /**
-     * OutputStream to write the content of stdout.
-     */
-    private OutputStream infoOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLog().info(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
-    /**
-     * OutputStream to write the content of stderr.
-     */
-    private OutputStream warnOutputStream = new OutputStream() {
-        StringBuffer buffer = new StringBuffer();
-
-        public void write(int b) throws IOException {
-            if (b == '\n') {
-                getLog().warn(buffer.toString());
-                buffer.setLength(0);
-            } else {
-                buffer.append((char) b);
-            }
-        }
-    };
-
     protected GrailsServices getGrailsServices() throws MojoExecutionException {
         grailsServices.setBasedir(basedir);
         return grailsServices;
@@ -272,10 +240,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             }
 
             if (metadataModified) metadata.persist();
-
-//            mainClass.getDeclaredMethod("setOut", new Class[]{ PrintStream.class }).invoke(
-//                    scriptRunner,
-//                    new Object[] { new PrintStream(infoOutputStream) });
 
             // If the command is running in non-interactive mode, we
             // need to pass on the relevant argument.
