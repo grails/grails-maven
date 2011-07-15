@@ -58,6 +58,15 @@ public class MvnTestMojo extends AbstractGrailsMojo {
      */
     private boolean testFailureIgnore;
 
+    /**
+     * Choose which type of tests to launch (passes --unit or --integration to Grails command).
+     * Default is all : Unit tests + Integration tests.
+     * Other values are 'unit' and 'integration'.
+     *
+     * @parameter default-value="all" expression="${grails.test.type}"
+     */
+    private String testType;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
             return;
@@ -81,8 +90,23 @@ public class MvnTestMojo extends AbstractGrailsMojo {
             }
         }
 
+        if (testType == null || "".equals(testType)) {
+            testType = "all";
+        }
+
         try {
-            runGrails("TestApp", "--unit --integration", true);
+            // Unit tests only
+            if ("unit".equalsIgnoreCase(testType)) {
+                runGrails("TestApp", "--unit", true);
+            }
+            // Integration tests only
+            else if ("integration".equalsIgnoreCase(testType)) {
+                runGrails("TestApp", "--integration", true);
+            }
+            // All tests
+            else {
+                runGrails("TestApp", "--unit --integration", true);
+            }
         } catch (MojoExecutionException me) {
             if (!testFailureIgnore) {
                 throw me;
