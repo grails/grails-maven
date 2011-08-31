@@ -15,502 +15,535 @@
   limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.grails</groupId>
-  <artifactId>grails-maven-plugin</artifactId>
-  <version>2.0.0.BUILD-SNAPSHOT</version>
-  <packaging>maven-plugin</packaging>
-  
-  <name>Maven plugin for GRAILS applications</name>
-  <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
-  <url>http://github.com/grails/grails-maven</url>
-  
-  <properties>
-    <!-- Prerequisites -->
-    <maven.version>2.0.5</maven.version>
-    
-    <!-- Dependencies -->
-    <grails.version>2.0.0.BUILD-SNAPSHOT</grails.version>
-    <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
-    <grails-core.version>${grails.version}</grails-core.version>
-    <grails-scripts.version>${grails.version}</grails-scripts.version>
-    <grails-maven-archetype.version>${grails.version}</grails-maven-archetype.version>
-    
-    <maven-model.version>2.0.7</maven-model.version>
-    <maven-project.version>2.0.7</maven-project.version>
-    <maven-plugin-api.version>2.0.7</maven-plugin-api.version>
-    <maven-archiver.version>2.2</maven-archiver.version>
-    <plexus-utils.version>1.4.5</plexus-utils.version>
-    <junit.version>3.8.2</junit.version>
-    <spring.version>3.1.0.M2</spring.version>
-    <slf4j.version>1.6.1</slf4j.version>
-    <maven-plugin-testing-harness.version>1.1</maven-plugin-testing-harness.version>
-    <xmlunit.version>1.0</xmlunit.version>
-    <aspectjweaver.version>1.6.10</aspectjweaver.version>
-    <aspectjrt.version>1.6.10</aspectjrt.version>
-    
-    <!-- Reporting plugins -->
-    <maven-project-info-reports-plugin.version>2.0.1</maven-project-info-reports-plugin.version>
-    <maven-plugin-plugin.version>2.4.1</maven-plugin-plugin.version>
-    <plexus-maven-plugin.version>1.3.5</plexus-maven-plugin.version>
-    <maven-javadoc-plugin.version>2.4</maven-javadoc-plugin.version>
-    <maven-jxr-plugin.version>2.1</maven-jxr-plugin.version>
-    <maven-changelog-plugin.version>2.1</maven-changelog-plugin.version>
-    <maven-surefire-report-plugin.version>2.4.3</maven-surefire-report-plugin.version>
-    <maven-checkstyle-plugin.version>2.1</maven-checkstyle-plugin.version>
-    <maven-pmd-plugin.version>2.2</maven-pmd-plugin.version>
-    <findbugs-maven-plugin.version>1.1.1</findbugs-maven-plugin.version>
-    <rat-maven-plugin.version>1.0-alpha-3</rat-maven-plugin.version>
-    <cobertura-maven-plugin.version>2.4</cobertura-maven-plugin.version>
-  </properties>
-  
-  <prerequisites>
-    <maven>${maven.version}</maven>
-  </prerequisites>
-  
-  <dependencies>
-    <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-bootstrap</artifactId>
-      <version>${grails-bootstrap.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-core</artifactId>
-      <version>${grails-core.version}</version>
-    </dependency>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.grails</groupId>
+    <artifactId>grails-maven-plugin</artifactId>
+    <version>2.0.0.BUILD-SNAPSHOT</version>
+    <packaging>maven-plugin</packaging>
 
-    <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-scripts</artifactId>
-      <version>${grails-scripts.version}</version>
-      <scope>runtime</scope>
-    </dependency>
+    <name>Maven plugin for GRAILS applications</name>
+    <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
+    <url>http://github.com/grails/grails-maven</url>
 
-    <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-resources</artifactId>
-      <version>${grails-scripts.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    
-    <!--
-      Required by the "create-pom" goal because it contains the
-      template POM for a Grails project.
-    -->
-    <dependency>
-      <groupId>org.grails</groupId>
-      <artifactId>grails-maven-archetype</artifactId>
-      <version>${grails-maven-archetype.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-model</artifactId>
-      <version>${maven-model.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-      <version>${maven-project.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${maven-plugin-api.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-archiver</artifactId>
-      <version>${maven-archiver.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>${plexus-utils.version}</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-plugin-testing-harness</artifactId>
-      <version>${maven-plugin-testing-harness.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>xmlunit</groupId>
-      <artifactId>xmlunit</artifactId>
-      <version>${xmlunit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjweaver</artifactId>
-      <version>${aspectjweaver.version}</version>
-    </dependency>
+    <properties>
+        <!-- Prerequisites -->
+        <maven.version>2.0.5</maven.version>
 
-    <dependency>
-      <groupId>org.aspectj</groupId>
-      <artifactId>aspectjrt</artifactId>
-      <version>${aspectjrt.version}</version>
-    </dependency>
+        <!-- Dependencies -->
+        <grails.version>2.0.0.BUILD-SNAPSHOT</grails.version>
+        <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
+        <grails-core.version>${grails.version}</grails-core.version>
+        <grails-scripts.version>${grails.version}</grails-scripts.version>
+        <grails-maven-archetype.version>${grails.version}</grails-maven-archetype.version>
 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${spring.version}</version>
-    </dependency>
+        <maven-model.version>2.0.7</maven-model.version>
+        <maven-project.version>2.0.7</maven-project.version>
+        <maven-plugin-api.version>2.0.7</maven-plugin-api.version>
+        <maven-archiver.version>2.2</maven-archiver.version>
+        <plexus-utils.version>1.4.5</plexus-utils.version>
+        <junit.version>3.8.2</junit.version>
+        <spring.version>3.1.0.M2</spring.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <maven-plugin-testing-harness.version>1.1</maven-plugin-testing-harness.version>
+        <xmlunit.version>1.0</xmlunit.version>
+        <aspectjweaver.version>1.6.10</aspectjweaver.version>
+        <aspectjrt.version>1.6.10</aspectjrt.version>
 
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-jdk14</artifactId>
-        <version>${slf4j.version}</version>
-        <scope>runtime</scope>
-    </dependency>    
-  </dependencies>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generated-helpmojo</id>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>generate</id>
-            <goals>
-              <goal>descriptor</goal>
-            </goals>
-            <phase>process-sources</phase>
-            <configuration>
-              <outputDirectory>${project.build.directory}/generated-resources/plexus</outputDirectory>
-            </configuration>
-          </execution>
-          
-          <execution>
-            <id>merge</id>
-            <goals>
-              <goal>merge-descriptors</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>${project.build.directory}/generated-resources/plexus/META-INF/plexus/components.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-docck-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>pre-site</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-  
-  <reporting>
-    <plugins>
-      <plugin>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>${maven-project-info-reports-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven-plugin-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.plexus</groupId>
-        <artifactId>plexus-maven-plugin</artifactId>
-        <version>${plexus-maven-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven-javadoc-plugin.version}</version>
-        <configuration>
-          <tags>
-            <tag>
-              <name>plexus.component</name>
-              <placement>a</placement>
-              <head>This class is a plexus component</head>
-            </tag>
-            
-            <tag>
-              <name>component</name>
-              <placement>a</placement>
-              <head>This property is a component injected by plexus.</head>
-            </tag>
-            
-            <tag>
-              <name>readonly</name>
-              <placement>a</placement>
-              <head>The user cannot override this property from the command line.</head>
-            </tag>
-            
-            <tag>
-              <name>description</name>
-              <placement>a</placement>
-              <head>Description :</head>
-            </tag>
-            
-            <tag>
-              <name>requiresProject</name>
-              <placement>a</placement>
-              <head>This Mojo needs to be launched in a maven 2 project</head>
-            </tag>
-            
-            <tag>
-              <name>goal</name>
-              <placement>a</placement>
-              <head>The goal name for the Mojo :</head>
-            </tag>
-          </tags>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-jxr-plugin</artifactId>
-        <version>${maven-jxr-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-changelog-plugin</artifactId>
-        <version>${maven-changelog-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>${maven-surefire-report-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>${cobertura-maven-plugin.version}</version>        
-        <configuration>
-          <formats>
-            <format>html</format>
-            <format>xml</format>
-          </formats>
-        </configuration>        
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven-checkstyle-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>${maven-pmd-plugin.version}</version>
-        <configuration>
-          <linkXref>true</linkXref>
-          <minimumTokens>20</minimumTokens>
-          <targetJdk>1.4</targetJdk>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${findbugs-maven-plugin.version}</version>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
-        <version>${rat-maven-plugin.version}</version>
-        <configuration>
-          <excludes>
-            <exclude>**/it/**</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
-  
-  <profiles>
-    <profile>
-      <id>integration-tests</id>
-      
-      <activation>
-        <property>
-          <name>integration-tests</name>
-          <value>true</value>
-        </property>
-      </activation>
-      
-      <build>
+        <!-- Reporting plugins -->
+        <maven-project-info-reports-plugin.version>2.0.1</maven-project-info-reports-plugin.version>
+        <maven-plugin-plugin.version>2.4.1</maven-plugin-plugin.version>
+        <plexus-maven-plugin.version>1.3.5</plexus-maven-plugin.version>
+        <maven-javadoc-plugin.version>2.4</maven-javadoc-plugin.version>
+        <maven-jxr-plugin.version>2.1</maven-jxr-plugin.version>
+        <maven-changelog-plugin.version>2.1</maven-changelog-plugin.version>
+        <maven-surefire-report-plugin.version>2.4.3</maven-surefire-report-plugin.version>
+        <maven-checkstyle-plugin.version>2.1</maven-checkstyle-plugin.version>
+        <maven-pmd-plugin.version>2.2</maven-pmd-plugin.version>
+        <findbugs-maven-plugin.version>1.1.1</findbugs-maven-plugin.version>
+        <rat-maven-plugin.version>1.0-alpha-3</rat-maven-plugin.version>
+        <cobertura-maven-plugin.version>2.4</cobertura-maven-plugin.version>
+    </properties>
+
+    <prerequisites>
+        <maven>${maven.version}</maven>
+    </prerequisites>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-bootstrap</artifactId>
+            <version>${grails-bootstrap.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-core</artifactId>
+            <version>${grails-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.grails</groupId>
+                    <artifactId>grails-web</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate.java-persistence</groupId>
+                    <artifactId>jpa-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-scripts</artifactId>
+            <version>${grails-scripts.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-resources</artifactId>
+            <version>${grails-scripts.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-plugin-tomcat</artifactId>
+            <version>${grails.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.grails</groupId>
+                    <artifactId>grails-web</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hibernate.java-persistence</groupId>
+                    <artifactId>jpa-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--
+          Required by the "create-pom" goal because it contains the
+          template POM for a Grails project.
+        -->
+        <dependency>
+            <groupId>org.grails</groupId>
+            <artifactId>grails-maven-archetype</artifactId>
+            <version>${grails-maven-archetype.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>${maven-model.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+            <version>${maven-project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${maven-plugin-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-archiver</artifactId>
+            <version>${maven-archiver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>${plexus-utils.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-plugin-testing-harness</artifactId>
+            <version>${maven-plugin-testing-harness.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>${xmlunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectjweaver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectjrt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
         <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>shitty-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>clean</goal>
-                  <goal>install</goal>
-                  <goal>test</goal>
-                </goals>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generated-helpmojo</id>
+                        <goals>
+                            <goal>helpmojo</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>descriptor</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-resources/plexus</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>merge</id>
+                        <goals>
+                            <goal>merge-descriptors</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>
+                                    ${project.build.directory}/generated-resources/plexus/META-INF/plexus/components.xml
+                                </descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-docck-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>${maven-project-info-reports-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>${maven-plugin-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-maven-plugin</artifactId>
+                <version>${plexus-maven-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
-                  <projects>
-                    <fileset>
-                      <directory>src/it</directory>
-                      <includes>
-                        <include>${includeITs}</include>
-                      </includes>
-                      <excludes>
-                        <exclude>${excludeITs}</exclude>
-                      </excludes>
-                    </fileset>
-                  </projects>
-                  <parallel>true</parallel>
-                  <threadCount>2</threadCount>
-                  <flags>-DgrailsHome-0.5.6=${grailsHome-0.5.6} -DgrailsHome-0.6=${grailsHome-0.6}</flags>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-      
-      <repositories>
-        <repository>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <id>codehaus.snapshots</id>
-          <url>http://snapshots.repository.codehaus.org/</url>
-        </repository>
-      </repositories>
-      
-      <pluginRepositories>
-        <pluginRepository>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <id>codehaus.snapshots</id>
-          <url>http://snapshots.repository.codehaus.org/</url>
-        </pluginRepository>
-      </pluginRepositories>
-      <properties>
-        <includeITs>**/pom4test.xml</includeITs>
-        <excludeITs>**/run-webtest/pom4test.xml</excludeITs>
-      </properties>
-    </profile>
-    
-    <profile>
-      <id>release</id>
-      
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>rat-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>verify</phase>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-  
-  <repositories>
-    <!--
-      Necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
-      dependency on netty. Excludes don't work because grails-maven-plugin ignores them.
-    -->
-    <repository>
-      <id>grails</id>
-      <url>http://repo.grails.org/grails/core</url>
-    </repository>
+                    <tags>
+                        <tag>
+                            <name>plexus.component</name>
+                            <placement>a</placement>
+                            <head>This class is a plexus component</head>
+                        </tag>
 
-    <repository>
-      <id>spring-roo</id>
-      <url>http://spring-roo-repository.springsource.org.s3.amazonaws.com/release</url>
-    </repository>
-  </repositories>
-  
-  <distributionManagement>
-    <repository>
-      <id>codehaus.org</id>
-      <name>Grails Main Repository</name>
-      <url>dav:https://dav.codehaus.org/repository/grails</url>
-    </repository>
-    
-    <snapshotRepository>
-      <id>codehaus.org</id>
-      <name>Grails Snapshots Repository</name>
-      <url>dav:https://dav.codehaus.org/snapshots.repository/grails</url>
-    </snapshotRepository>
-  </distributionManagement>
+                        <tag>
+                            <name>component</name>
+                            <placement>a</placement>
+                            <head>This property is a component injected by plexus.</head>
+                        </tag>
+
+                        <tag>
+                            <name>readonly</name>
+                            <placement>a</placement>
+                            <head>The user cannot override this property from the command line.</head>
+                        </tag>
+
+                        <tag>
+                            <name>description</name>
+                            <placement>a</placement>
+                            <head>Description :</head>
+                        </tag>
+
+                        <tag>
+                            <name>requiresProject</name>
+                            <placement>a</placement>
+                            <head>This Mojo needs to be launched in a maven 2 project</head>
+                        </tag>
+
+                        <tag>
+                            <name>goal</name>
+                            <placement>a</placement>
+                            <head>The goal name for the Mojo :</head>
+                        </tag>
+                    </tags>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>${maven-jxr-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-changelog-plugin</artifactId>
+                <version>${maven-changelog-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${maven-surefire-report-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>${cobertura-maven-plugin.version}</version>
+                <configuration>
+                    <formats>
+                        <format>html</format>
+                        <format>xml</format>
+                    </formats>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${maven-pmd-plugin.version}</version>
+                <configuration>
+                    <linkXref>true</linkXref>
+                    <minimumTokens>20</minimumTokens>
+                    <targetJdk>1.4</targetJdk>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${findbugs-maven-plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rat-maven-plugin</artifactId>
+                <version>${rat-maven-plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/it/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+
+            <activation>
+                <property>
+                    <name>integration-tests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>shitty-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>clean</goal>
+                                    <goal>install</goal>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <projects>
+                                        <fileset>
+                                            <directory>src/it</directory>
+                                            <includes>
+                                                <include>${includeITs}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${excludeITs}</exclude>
+                                            </excludes>
+                                        </fileset>
+                                    </projects>
+                                    <parallel>true</parallel>
+                                    <threadCount>2</threadCount>
+                                    <flags>-DgrailsHome-0.5.6=${grailsHome-0.5.6} -DgrailsHome-0.6=${grailsHome-0.6}
+                                    </flags>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+
+            <repositories>
+                <repository>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <id>codehaus.snapshots</id>
+                    <url>http://snapshots.repository.codehaus.org/</url>
+                </repository>
+            </repositories>
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <id>codehaus.snapshots</id>
+                    <url>http://snapshots.repository.codehaus.org/</url>
+                </pluginRepository>
+            </pluginRepositories>
+            <properties>
+                <includeITs>**/pom4test.xml</includeITs>
+                <excludeITs>**/run-webtest/pom4test.xml</excludeITs>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>release</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rat-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <!--
+          Necessary to compensate for the fact that GPars 0.9 POM mistakenly has non-optional
+          dependency on netty. Excludes don't work because grails-maven-plugin ignores them.
+        -->
+        <repository>
+            <id>grails</id>
+            <url>http://repo.grails.org/grails/core</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>codehaus.org</id>
+            <name>Grails Main Repository</name>
+            <url>dav:https://dav.codehaus.org/repository/grails</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>codehaus.org</id>
+            <name>Grails Snapshots Repository</name>
+            <url>dav:https://dav.codehaus.org/snapshots.repository/grails</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

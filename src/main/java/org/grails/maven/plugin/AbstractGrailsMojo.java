@@ -192,6 +192,17 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         // Now add the project dependencies if necessary.
         if (includeProjectDeps) {
             deps.addAll(this.project.getRuntimeArtifacts());
+            Set dependencyArtifacts = this.project.getDependencyArtifacts();
+            for (Iterator iterator = dependencyArtifacts.iterator(); iterator.hasNext(); ) {
+                Object dependencyArtifact = iterator.next();
+                if(dependencyArtifact != null && !deps.contains(dependencyArtifact)) {
+                    Artifact a = (Artifact) dependencyArtifact;
+                    if(a.getFile() != null) {
+                        deps.add(dependencyArtifact);
+                    }
+                }
+
+            }
         }
 
         URL[] classpath;
@@ -199,7 +210,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             classpath = new URL[deps.size() + systemDeps.size() +1];
             int index = 0;
             for (Iterator iter = deps.iterator(); iter.hasNext();) {
-                classpath[index++] = ((Artifact) iter.next()).getFile().toURI().toURL();
+                File file = ((Artifact) iter.next()).getFile();
+                if(file != null) {
+                    classpath[index++] = file.toURI().toURL();
+                }
             }
             //add paths to system dependencies to the classpath
             for (Iterator iter = systemDeps.iterator(); iter.hasNext();) {
@@ -319,14 +333,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             InstantiationException, MojoExecutionException, NoSuchMethodException, InvocationTargetException {
         String targetDir = this.project.getBuild().getDirectory();
         helper.setDependenciesExternallyConfigured(true);
-        helper.setCompileDependencies(artifactsToFiles(removePluginDependencies(this.project.getCompileArtifacts())));
-        helper.setTestDependencies(artifactsToFiles(removePluginDependencies(this.project.getTestArtifacts())));
-        helper.setRuntimeDependencies(artifactsToFiles(removePluginDependencies(this.project.getRuntimeArtifacts())));
+        helper.setCompileDependencies(artifactsToFiles(this.project.getCompileArtifacts()));
+        helper.setTestDependencies(artifactsToFiles(this.project.getTestArtifacts()));
+        helper.setRuntimeDependencies(artifactsToFiles(this.project.getRuntimeArtifacts()));
         helper.setProjectWorkDir(new File(targetDir));
         helper.setClassesDir(new File(targetDir, "classes"));
         helper.setTestClassesDir(new File(targetDir, "test-classes"));
         helper.setResourcesDir(new File(targetDir, "resources"));
         helper.setProjectPluginsDir(this.pluginsDir);
+        helper.setBuildDependencies(artifactsToFiles(getGrailsPluginDependencies()));
     }
 
     private Set getPluginDependencies(Artifact pom) throws MojoExecutionException {
