@@ -16,17 +16,23 @@
 
 package org.grails.maven.plugin;
 
-import org.grails.maven.plugin.tools.GrailsProject;
-import org.grails.maven.plugin.tools.GrailsServices;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.HashMap;
-import java.util.Map;
+import org.grails.maven.plugin.tools.GrailsProject;
+import org.grails.maven.plugin.tools.GrailsServices;
 
 /**
  * Creates a creates a maven 2 POM for an existing Grails project.
@@ -73,16 +79,16 @@ public class CreatePomMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         grailsServices.setBasedir(basedir);
-        GrailsProject grailsDescr = grailsServices.readProjectDescriptor();
+        final GrailsProject grailsDescr = grailsServices.readProjectDescriptor();
 
-        Map varSubstitutions = new HashMap();
+        final Map<String,String> varSubstitutions = new HashMap<String,String>();
         varSubstitutions.put("groupId", groupId);
         varSubstitutions.put("artifactId", grailsDescr.getAppName());
         varSubstitutions.put("version", grailsDescr.getAppVersion());
 
         // Load the template POM from the archetype (which is on the
         // classpath).
-        InputStream input = getClass().getClassLoader().getResourceAsStream("archetype-resources/pom.xml");
+        final InputStream input = getClass().getClassLoader().getResourceAsStream("archetype-resources/pom.xml");
         BufferedReader reader = null;
         BufferedWriter writer = null;
         try {
@@ -94,14 +100,14 @@ public class CreatePomMojo extends AbstractMojo {
             // but only if the variable name is in the "varSubstitutions"
             // map does the replacement take place.
             for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                Matcher matcher = VAR_PATTERN.matcher(line);
-                StringBuffer buf = new StringBuffer(line.length());
+                final Matcher matcher = VAR_PATTERN.matcher(line);
+                final StringBuffer buf = new StringBuffer(line.length());
 
                 // Find all variable expansion patterns in this line.
                 while (matcher.find()) {
                     // Get the substitution string for the variable
                     // name.
-                    String sub = (String) varSubstitutions.get(matcher.group(1));
+                    String sub = varSubstitutions.get(matcher.group(1));
                     if (sub == null) {
                         // No substitution string found for this name,
                         // so we simply add the original text. Since
@@ -118,21 +124,21 @@ public class CreatePomMojo extends AbstractMojo {
                 writer.write(buf.toString());
                 writer.newLine();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Failed to create POM file.", e);
         } finally {
-            if (reader != null) try { reader.close(); } catch (IOException e) {}
-            if (writer != null) try { writer.close(); } catch (IOException e) {}
+            if (reader != null) try { reader.close(); } catch (final IOException e) {}
+            if (writer != null) try { writer.close(); } catch (final IOException e) {}
         }
 
         // Add the web.xml file that's required to get the packaging
         // working.
-        File webXml = new File(basedir, "src/main/webapp/WEB-INF/web.xml");
+        final File webXml = new File(basedir, "src/main/webapp/WEB-INF/web.xml");
         if (!webXml.exists()) {
             webXml.getParentFile().mkdirs();
             try {
                 webXml.createNewFile();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 getLog().warn("Unable to create the dummy web descriptor '" + webXml.getPath() +
                         "' - " + "the package phase won't work without it, so you should create " +
                         "it (an empty file) manually. Reason: " + e.getMessage());

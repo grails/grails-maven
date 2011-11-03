@@ -32,6 +32,6 @@ import org.apache.maven.plugin.MojoFailureException;
 public class GrailsRunAppMojo extends AbstractGrailsMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("RunApp", null, true);
+        runGrails("RunApp", null);
     }
 }

@@ -43,6 +43,6 @@ public class GrailsCreateIntegrationTestMojo extends AbstractGrailsMojo {
     private String integrationTestName;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("CreateIntegrationTest", integrationTestName, false);
+        runGrails("CreateIntegrationTest", integrationTestName);
     }
 }

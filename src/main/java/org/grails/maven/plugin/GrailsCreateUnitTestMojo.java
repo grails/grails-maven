@@ -42,6 +42,6 @@ public class GrailsCreateUnitTestMojo extends AbstractGrailsMojo {
     private String unitTestName;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("CreateUnitTest", unitTestName, false);
+        runGrails("CreateUnitTest", unitTestName);
     }
 }

@@ -39,6 +39,6 @@ public class GrailsCreateTagLibMojo extends AbstractGrailsMojo {
     private String tagLibName;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("CreateTagLib", tagLibName, false);
+        runGrails("CreateTagLib", tagLibName);
     }
 }

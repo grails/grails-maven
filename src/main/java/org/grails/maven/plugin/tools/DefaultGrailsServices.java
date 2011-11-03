@@ -18,6 +18,14 @@ package org.grails.maven.plugin.tools;
 import grails.util.GrailsNameUtils;
 import groovy.lang.GroovyClassLoader;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Properties;
+
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -28,12 +36,6 @@ import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.springframework.core.io.FileSystemResource;
-
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
@@ -46,7 +48,7 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     private static final String FILE_SUFFIX = "GrailsPlugin.groovy";
 
     private File _basedir;
-    private List _dependencyPaths;
+//    private List _dependencyPaths;
 
     private File getBasedir() {
         if (_basedir != null) {
@@ -60,22 +62,22 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     // GrailsServices Implementation
     // -----------------------------------------------------------------------
 
-    public void setBasedir(File basedir) {
+    public void setBasedir(final File basedir) {
         this._basedir = basedir;
     }
 
-    public MavenProject createPOM(String groupId, GrailsProject grailsProjectDescriptor, String mtgGroupId,
-                                  String grailsPluginArtifactId, String mtgVersion) {
+    public MavenProject createPOM(final String groupId, final GrailsProject grailsProjectDescriptor, final String mtgGroupId,
+                                  final String grailsPluginArtifactId, final String mtgVersion) {
         return createPOM(groupId, grailsProjectDescriptor, mtgGroupId, grailsPluginArtifactId, mtgVersion, false);
     }
 
-    public MavenProject createPOM(String groupId, GrailsProject grailsProjectDescriptor, String mtgGroupId,
-                                  String grailsPluginArtifactId, String mtgVersion, boolean addEclipseSettings) {
-        MavenProject pom = new MavenProject();
+    public MavenProject createPOM(final String groupId, final GrailsProject grailsProjectDescriptor, final String mtgGroupId,
+                                  final String grailsPluginArtifactId, final String mtgVersion, final boolean addEclipseSettings) {
+        final MavenProject pom = new MavenProject();
         if (pom.getBuild().getPluginManagement() == null) {
             pom.getBuild().setPluginManagement(new PluginManagement());
         }
-        PluginManagement pluginMgt = pom.getPluginManagement();
+        final PluginManagement pluginMgt = pom.getPluginManagement();
 
         // Those four properties are needed.
         pom.setModelVersion("4.0.0");
@@ -84,49 +86,49 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         pom.getModel().getProperties().setProperty("grailsHome", "${env.GRAILS_HOME}");
         pom.getModel().getProperties().setProperty("grailsVersion", grailsProjectDescriptor.getAppGrailsVersion());
         // Add our own plugin
-        Plugin grailsPlugin = new Plugin();
+        final Plugin grailsPlugin = new Plugin();
         grailsPlugin.setGroupId(mtgGroupId);
         grailsPlugin.setArtifactId(grailsPluginArtifactId);
         grailsPlugin.setVersion(mtgVersion);
         grailsPlugin.setExtensions(true);
         pom.addPlugin(grailsPlugin);
         // Add compiler plugin settings
-        Plugin compilerPlugin = new Plugin();
+        final Plugin compilerPlugin = new Plugin();
         compilerPlugin.setGroupId("org.apache.maven.plugins");
         compilerPlugin.setArtifactId("maven-compiler-plugin");
-        Xpp3Dom compilerConfig = new Xpp3Dom("configuration");
-        Xpp3Dom source = new Xpp3Dom("source");
+        final Xpp3Dom compilerConfig = new Xpp3Dom("configuration");
+        final Xpp3Dom source = new Xpp3Dom("source");
         source.setValue("1.5");
         compilerConfig.addChild(source);
-        Xpp3Dom target = new Xpp3Dom("target");
+        final Xpp3Dom target = new Xpp3Dom("target");
         target.setValue("1.5");
         compilerConfig.addChild(target);
         compilerPlugin.setConfiguration(compilerConfig);
         pom.addPlugin(compilerPlugin);
         // Add eclipse plugin settings
         if (addEclipseSettings) {
-            Plugin warPlugin = new Plugin();
+            final Plugin warPlugin = new Plugin();
             warPlugin.setGroupId("org.apache.maven.plugins");
             warPlugin.setArtifactId("maven-war-plugin");
-            Xpp3Dom warConfig = new Xpp3Dom("configuration");
-            Xpp3Dom warSourceDirectory = new Xpp3Dom("warSourceDirectory");
+            final Xpp3Dom warConfig = new Xpp3Dom("configuration");
+            final Xpp3Dom warSourceDirectory = new Xpp3Dom("warSourceDirectory");
             warSourceDirectory.setValue("web-app");
             warConfig.addChild(warSourceDirectory);
             warPlugin.setConfiguration(warConfig);
             pluginMgt.addPlugin(warPlugin);
 
-            Plugin eclipsePlugin = new Plugin();
+            final Plugin eclipsePlugin = new Plugin();
             eclipsePlugin.setGroupId("org.apache.maven.plugins");
             eclipsePlugin.setArtifactId("maven-eclipse-plugin");
-            Xpp3Dom configuration = new Xpp3Dom("configuration");
-            Xpp3Dom projectnatures = new Xpp3Dom("additionalProjectnatures");
-            Xpp3Dom projectnature = new Xpp3Dom("projectnature");
+            final Xpp3Dom configuration = new Xpp3Dom("configuration");
+            final Xpp3Dom projectnatures = new Xpp3Dom("additionalProjectnatures");
+            final Xpp3Dom projectnature = new Xpp3Dom("projectnature");
             projectnature.setValue("org.codehaus.groovy.eclipse.groovyNature");
             projectnatures.addChild(projectnature);
             configuration.addChild(projectnatures);
-            Xpp3Dom additionalBuildcommands = new Xpp3Dom(
+            final Xpp3Dom additionalBuildcommands = new Xpp3Dom(
                 "additionalBuildcommands");
-            Xpp3Dom buildcommand = new Xpp3Dom("buildcommand");
+            final Xpp3Dom buildcommand = new Xpp3Dom("buildcommand");
             buildcommand.setValue("org.codehaus.groovy.eclipse.groovyBuilder");
             additionalBuildcommands.addChild(buildcommand);
             configuration.addChild(additionalBuildcommands);
@@ -136,7 +138,7 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
             // jstWeb.setValue("2.5");
             // additionalProjectFacets.addChild(jstWeb);
             // configuration.addChild(additionalProjectFacets);
-            Xpp3Dom packaging = new Xpp3Dom("packaging");
+            final Xpp3Dom packaging = new Xpp3Dom("packaging");
             packaging.setValue("war");
             configuration.addChild(packaging);
 
@@ -165,35 +167,35 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         // Load existing Grails properties
         FileInputStream fis = null;
         try {
-            Properties properties = new Properties();
+            final Properties properties = new Properties();
             fis = new FileInputStream(new File(getBasedir(), "application.properties"));
             properties.load(fis);
 
-            GrailsProject grailsProject = new GrailsProject();
+            final GrailsProject grailsProject = new GrailsProject();
             grailsProject.setAppGrailsVersion(properties.getProperty("app.grails.version"));
             grailsProject.setAppName(properties.getProperty("app.name"));
             grailsProject.setAppVersion(properties.getProperty("app.version"));
 
             return grailsProject;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Unable to read grails project descriptor.", e);
         } finally {
             IOUtil.close(fis);
         }
     }
 
-    public void writeProjectDescriptor(File projectDir, GrailsProject grailsProjectDescriptor) throws MojoExecutionException {
-        String description = "Grails Descriptor updated by grails-maven-plugin on " + new Date();
+    public void writeProjectDescriptor(final File projectDir, final GrailsProject grailsProjectDescriptor) throws MojoExecutionException {
+        final String description = "Grails Descriptor updated by grails-maven-plugin on " + new Date();
 
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(new File(projectDir, "application.properties"));
-            Properties properties = new Properties();
+            final Properties properties = new Properties();
             properties.setProperty("app.grails.version", grailsProjectDescriptor.getAppGrailsVersion());
             properties.setProperty("app.name", grailsProjectDescriptor.getAppName());
             properties.setProperty("app.version", grailsProjectDescriptor.getAppVersion());
             properties.store(fos, description);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Unable to write grails project descriptor.", e);
         } finally {
             IOUtil.close(fos);
@@ -201,10 +203,10 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     }
 
     public GrailsPluginProject readGrailsPluginProject() throws MojoExecutionException {
-        GrailsPluginProject pluginProject = new GrailsPluginProject();
+        final GrailsPluginProject pluginProject = new GrailsPluginProject();
 
-        File[] files = getBasedir().listFiles(new FilenameFilter() {
-            public boolean accept(File file, String s) {
+        final File[] files = getBasedir().listFiles(new FilenameFilter() {
+            public boolean accept(final File file, final String s) {
                 return s.endsWith(FILE_SUFFIX) && s.length() > FILE_SUFFIX.length();
             }
         });
@@ -214,17 +216,17 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
                 "called FooGrailsPlugin.groovy in '" + getBasedir().getAbsolutePath() + "'.");
         }
 
-        File descriptor = files[0];
+        final File descriptor = files[0];
         pluginProject.setFileName(descriptor);
 
-        String className = descriptor.getName().substring(0, descriptor.getName().length() - ".groovy".length());
-        String pluginName = GrailsNameUtils.getScriptName(GrailsNameUtils.getLogicalName(className, "GrailsPlugin"));
+        final String className = descriptor.getName().substring(0, descriptor.getName().length() - ".groovy".length());
+        final String pluginName = GrailsNameUtils.getScriptName(GrailsNameUtils.getLogicalName(className, "GrailsPlugin"));
         pluginProject.setPluginName(pluginName);
 
-        GroovyClassLoader classLoader = new GroovyClassLoader();
-        AstPluginDescriptorReader reader = new AstPluginDescriptorReader(classLoader);
-        GrailsPluginInfo info = reader.readPluginInfo(new FileSystemResource(descriptor));
-        String version = info.getVersion();
+        final GroovyClassLoader classLoader = new GroovyClassLoader();
+        final AstPluginDescriptorReader reader = new AstPluginDescriptorReader(classLoader);
+        final GrailsPluginInfo info = reader.readPluginInfo(new FileSystemResource(descriptor));
+        final String version = info.getVersion();
 
         if (version == null || version.trim().length() == 0) {
             throw new MojoExecutionException("Plugin does not have a version!");

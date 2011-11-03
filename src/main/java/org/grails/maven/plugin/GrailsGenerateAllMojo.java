@@ -41,6 +41,6 @@ public class GrailsGenerateAllMojo extends AbstractGrailsMojo {
     private String domainClassName;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("GenerateAll", domainClassName, true);
+        runGrails("GenerateAll", domainClassName);
     }
 }

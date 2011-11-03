@@ -15,10 +15,10 @@
  */
 package org.grails.maven.plugin;
 
+import java.io.File;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-
-import java.io.File;
 
 /**
  * Set sources/tests directories to be compatible with the directories layout used by grails.
@@ -34,14 +34,14 @@ import java.io.File;
 public class MvnConfigDirectoriesMojo extends AbstractGrailsMojo {
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.apache.maven.plugin.Mojo#execute()
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
-        File projectDir = this.project.getBasedir();
+        final File projectDir = this.project.getBasedir();
 
         // Get all the sub-directories of the "plugins" dir.
-        File pluginsDir = new File(projectDir, "plugins");
+//        File pluginsDir = new File(projectDir, "plugins");
 //        File[] dirs = pluginsDir.listFiles(new FileFilter() {
 //            public boolean accept(File file) {
 //                return file.isDirectory();
@@ -61,7 +61,7 @@ public class MvnConfigDirectoriesMojo extends AbstractGrailsMojo {
         this.project.addCompileSourceRoot((new File(projectDir, "/grails-app/services")).getAbsolutePath());
         this.project.addCompileSourceRoot((new File(projectDir, "/grails-app/taglib")).getAbsolutePath());
         this.project.addCompileSourceRoot((new File(projectDir, "/grails-app/utils")).getAbsolutePath());
-        this.project.addCompileSourceRoot((new File(projectDir, "/src/groovy")).getAbsolutePath());        
+        this.project.addCompileSourceRoot((new File(projectDir, "/src/groovy")).getAbsolutePath());
         this.project.addCompileSourceRoot((new File(projectDir, "src/java")).getAbsolutePath());
 
         // Add tests directories

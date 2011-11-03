@@ -18,8 +18,6 @@ package org.grails.maven.plugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import java.io.File;
-
 /**
  * Validate consistency between Grails and Maven settings.
  *
@@ -54,12 +52,12 @@ public class MvnPluginInitializeMojo extends AbstractGrailsMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             getGrailsServices().readProjectDescriptor();
-        } catch (MojoExecutionException ex) {
-            String pluginName = artifactId.substring(PLUGIN_PREFIX.length());
+        } catch (final MojoExecutionException ex) {
+            final String pluginName = artifactId.substring(PLUGIN_PREFIX.length());
 
             // Initialise the plugin.
             getLog().info("Cannot read application info, so initialising new plugin.");
-            runGrails("CreatePlugin", "--inplace --appVersion=" + version + " " + pluginName, false);
+            runGrails("CreatePlugin", "--inplace --appVersion=" + version + " " + pluginName);
         }
     }
 }

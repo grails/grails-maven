@@ -3,3 +3,10 @@ grails-maven-plugin.ipr
 grails-maven-plugin.iws
 META-INF
 target
+.classpath
+
+.DS_Store
+
+.settings/org.maven.ide.eclipse.prefs
+
+.settings/org.eclipse.jdt.core.prefs

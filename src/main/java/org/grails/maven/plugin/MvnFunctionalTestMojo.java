@@ -68,7 +68,7 @@ public class MvnFunctionalTestMojo extends AbstractGrailsMojo {
         }
 
         try {
-            runGrails("TestApp", "--functional", true);
+            runGrails("TestApp", "--functional");
         } catch (MojoExecutionException me) {
             if (!testFailureIgnore) {
                 throw me;

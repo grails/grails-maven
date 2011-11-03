@@ -15,10 +15,9 @@
  */
 package org.grails.maven.plugin;
 
-import java.util.Set;
-import java.util.Iterator;
-
 import java.net.MalformedURLException;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -54,28 +53,28 @@ public class GrailsInstallPluginMojo extends AbstractGrailsMojo {
      */
     private String pluginUrl;
 
-	/**
-	 * The version of the plugin to install.
-	 *
-	 * @parameter expression="${pluginVersion}"
-	 */
-	private String pluginVersion;
+    /**
+     * The version of the plugin to install.
+     *
+     * @parameter expression="${pluginVersion}"
+     */
+    private String pluginVersion;
 
-	/**
-	 * The maven groupId of the grails plugin to install.
-	 * This is only required if installing via Maven coordinates
-	 *
-	 * @parameter expression="${pluginGroupId}"
-	 */
-	private String pluginGroupId;
+    /**
+     * The maven groupId of the grails plugin to install.
+     * This is only required if installing via Maven coordinates
+     *
+     * @parameter expression="${pluginGroupId}"
+     */
+    private String pluginGroupId;
 
-	/**
-	 * The maven artifactId of the grails plugin to install.
-	 * This is only required if installing via Maven coordinates
-	 *
-	 * @parameter expression="${pluginArtifactId}"
-	 */
-	private String pluginArtifactId;
+    /**
+     * The maven artifactId of the grails plugin to install.
+     * This is only required if installing via Maven coordinates
+     *
+     * @parameter expression="${pluginArtifactId}"
+     */
+    private String pluginArtifactId;
 
 
     /**
@@ -101,9 +100,9 @@ public class GrailsInstallPluginMojo extends AbstractGrailsMojo {
                 args = args + ' ' + pluginVersion;
             }
         }
-		else if ((pluginGroupId != null) && (pluginArtifactId != null) && (pluginVersion != null)) {
-		    args = resolveGrailsPluginViaMavenCoordinates();
-		}
+        else if ((pluginGroupId != null) && (pluginArtifactId != null) && (pluginVersion != null)) {
+            args = resolveGrailsPluginViaMavenCoordinates();
+        }
         else {
             throw new MojoFailureException("Neither 'pluginName' nor 'pluginUrl' nor 'pluginGroupId'+'pluginArtifactId'+'pluginVersion' have been specified.");
         }
@@ -112,22 +111,23 @@ public class GrailsInstallPluginMojo extends AbstractGrailsMojo {
             args += " --global";
         }
 
-        runGrails("InstallPlugin", args, true);
+        runGrails("InstallPlugin", args);
     }
 
     /**
      * Resolve a file path to the grails plugin in the local maven repository via Maven coordinates.
      * @return file path to the grails plugin
      */
+    @SuppressWarnings("unchecked")
     private String resolveGrailsPluginViaMavenCoordinates() throws MojoFailureException {
 
         String localPathToPlugin = null;
 
         try {
             // traverse dependency tree to find the plugin.
-            Set artifacts = project.getDependencyArtifacts();
-            for (Iterator artifactIterator = artifacts.iterator(); artifactIterator.hasNext();) {
-              Artifact artifact = (Artifact) artifactIterator.next();
+            final Set<Artifact> artifacts = project.getDependencyArtifacts();
+            for (final Iterator<Artifact> artifactIterator = artifacts.iterator(); artifactIterator.hasNext();) {
+              final Artifact artifact = artifactIterator.next();
               if (artifact.getGroupId().equals(pluginGroupId) &&
                   artifact.getArtifactId().equals(pluginArtifactId) &&
                   artifact.getVersion().equals(pluginVersion)) {
@@ -142,7 +142,7 @@ public class GrailsInstallPluginMojo extends AbstractGrailsMojo {
               }
             }
         }
-        catch (MalformedURLException mue) {
+        catch (final MalformedURLException mue) {
             throw new MojoFailureException("Caught MalformedURLException: " + mue.toString());
         }
         if (localPathToPlugin == null) {

@@ -15,10 +15,9 @@
  */
 package org.grails.maven.plugin;
 
-import org.grails.maven.plugin.tools.GrailsPluginProject;
-import org.grails.maven.plugin.tools.GrailsProject;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.grails.maven.plugin.tools.GrailsPluginProject;
 
 /**
  * Validate consistency between Grails and Maven settings.
@@ -66,13 +65,13 @@ public class MvnPluginValidateMojo extends AbstractGrailsMojo {
 
         try {
             getGrailsServices().readProjectDescriptor();
-        } catch (MojoExecutionException e) {
+        } catch (final MojoExecutionException e) {
             getLog().info("No Grails project found - skipping validation.");
             return;
         }
 
-        GrailsPluginProject grailsProject = getGrailsServices().readGrailsPluginProject();
-        String pluginName = grailsProject.getPluginName();
+        final GrailsPluginProject grailsProject = getGrailsServices().readGrailsPluginProject();
+        final String pluginName = grailsProject.getPluginName();
 
         /*
         if (artifactId.equals(pluginName)) {
@@ -89,8 +88,8 @@ public class MvnPluginValidateMojo extends AbstractGrailsMojo {
                 "descriptor.");
         }
 
-        String pomVersion = version.trim();
-        String grailsVersion = grailsProject.getVersion();
+        final String pomVersion = version.trim();
+        final String grailsVersion = grailsProject.getVersion();
 
         if (!grailsVersion.equals(pomVersion)) {
             throw new MojoFailureException("The version specified in the plugin descriptor " +

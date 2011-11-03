@@ -42,6 +42,6 @@ public class GrailsUninstallPluginMojo extends AbstractGrailsMojo {
             throw new MojoFailureException("'pluginName' must be specified.");
         }
 
-        runGrails("UninstallPlugin", pluginName, false);
+        runGrails("UninstallPlugin", pluginName);
     }
 }

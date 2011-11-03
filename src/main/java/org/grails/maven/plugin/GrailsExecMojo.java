@@ -48,6 +48,6 @@ public class GrailsExecMojo extends AbstractGrailsMojo {
     private String args;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails(GrailsNameUtils.getNameFromScript(command), args, true);
+        runGrails(GrailsNameUtils.getNameFromScript(command), args);
     }
 }

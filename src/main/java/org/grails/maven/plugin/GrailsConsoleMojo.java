@@ -1,12 +1,12 @@
 /*
  * Copyright 2007 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.grails.maven.plugin.AbstractGrailsMojo;
 
 /**
  * Runs a Grails console inside the current project.
@@ -33,6 +32,6 @@ import org.grails.maven.plugin.AbstractGrailsMojo;
 public class GrailsConsoleMojo extends AbstractGrailsMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("Console", null, true);
+        runGrails("Console", null);
     }
 }

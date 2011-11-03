@@ -15,12 +15,10 @@
  */
 package org.grails.maven.plugin;
 
+import java.io.File;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.handler.ArtifactHandler;
-
-import java.io.File;
 
 /**
  * Creates a WAR archive for the project and puts it in the usual Maven
@@ -43,9 +41,9 @@ public class MvnWarMojo extends AbstractGrailsMojo {
      * @throws MojoExecutionException if an error occured while building the webapp
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
-        String warFileName = project.getArtifactId() + "-" + project.getVersion() + ".war";
+        final String warFileName = project.getArtifactId() + "-" + project.getVersion() + ".war";
         warFile = new File(project.getBuild().getDirectory(), warFileName);
 
-        runGrails("War", warFile.toString(), true);
+        runGrails("War", warFile.toString());
     }
 }
