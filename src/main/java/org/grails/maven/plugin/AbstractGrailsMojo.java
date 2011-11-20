@@ -62,6 +62,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     public static final String PLUGIN_PREFIX = "grails-";
 
+	private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
+
     /**
      * The directory where is launched the mvn command.
      *
@@ -443,7 +445,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
             // Now add it to the application metadata.
             getLog().debug("Updating project metadata");
-            metadata.setProperty("plugins." + pluginName, pluginVersion);
+			metadata.setProperty(String.format(GRAILS_PLUGIN_NAME_FORMAT, plugin.getGroupId(), pluginName), pluginVersion);
             return true;
         } else {
             return false;
