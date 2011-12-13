@@ -218,13 +218,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 }
             }
 
-            if (metadataModified) metadata.persist();
+            if (metadataModified) 
+				metadata.persist();
 
             // If the command is running in non-interactive mode, we
             // need to pass on the relevant argument.
             if (this.nonInteractive) {
-                args = args == null ? "--non-interactive" : "--non-interactive " + args;
+                args = (args != null) ? "--non-interactive" + args : "--non-interactive ";
             }
+
+			// Enable the plain output for the Grails command to fix an issue with JLine
+			// consuming the standard output after execution via Maven.
+			args = (args != null) ? "--plain-output " + args : "--plain-output";
 
             final int retval = launcher.launch(targetName, args, env);
             if (retval != 0) {
