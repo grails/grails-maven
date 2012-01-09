@@ -20,6 +20,8 @@ import grails.util.Metadata;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import jline.Terminal;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
@@ -198,12 +201,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
+        InputStream currentIn = System.in;
+        PrintStream currentOutput = System.out;
         try {
             final URL[] classpath = generateGrailsExecutionClasspath();
 
             final String grailsHomePath = (grailsHome != null) ? grailsHome.getAbsolutePath() : null;
             final RootLoader rootLoader = new RootLoader(classpath, ClassLoader.getSystemClassLoader());
             final GrailsLauncher launcher = new GrailsLauncher(rootLoader, grailsHomePath, basedir.getAbsolutePath());
+            launcher.setPlainOutput(true);
             configureBuildSettings(launcher);
 
             // Search for all Grails plugin dependencies and install
@@ -240,6 +246,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             throw ex;
         } catch (final Exception ex) {
             throw new MojoExecutionException("Unable to start Grails", ex);
+        }
+        finally {
+            Terminal.resetTerminal();
+            System.setIn(currentIn);
+            System.setOut(currentOutput);
         }
     }
 
