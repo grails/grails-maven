@@ -64,6 +64,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>1.0</version>
+        </dependency>
+                
+        <dependency>
             <groupId>org.grails</groupId>
             <artifactId>grails-bootstrap</artifactId>
             <version>${grails-bootstrap.version}</version>
