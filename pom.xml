@@ -17,7 +17,32 @@
     <name>Maven plugin for GRAILS applications</name>
     <description>This plugin allows you to integrate GRAILS applications into maven 2 builds.</description>
     <url>http://github.com/grails/grails-maven</url>
+    <licenses>
+        <license>
+          <name>The Apache Software License, Version 2.0</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          <distribution>repo</distribution>
+        </license>    
+    </licenses>
+    <scm>
+      <url>http://github.com/grails/grails-maven-archetype</url>
+      <developerConnection>scm:git:git://github.com/grails/grails-maven-archetype.git</developerConnection>
+      <connection>scm:git:git@github.com:grails/grails-maven-archetype.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>graemerocher</id>
+        <name>Graeme Rocher</name>
+        <email>graeme.rocher@gmail.com</email>
+      </developer>
+    </developers>
 
+    <parent>
+      <groupId>org.sonatype.oss</groupId>
+      <artifactId>oss-parent</artifactId>
+      <version>7</version>
+    </parent>
+    
     <properties>
         <!-- Prerequisites -->
         <maven.version>2.0.5</maven.version>
@@ -36,7 +61,7 @@
         <maven-archiver.version>2.2</maven-archiver.version>
         <plexus-utils.version>1.4.5</plexus-utils.version>
         <junit.version>3.8.2</junit.version>
-        <spring.version>3.1.0.M2</spring.version>
+        <spring.version>3.0.0.RELEASE</spring.version>
         <slf4j.version>1.6.1</slf4j.version>
         <maven-plugin-testing-harness.version>1.1</maven-plugin-testing-harness.version>
         <xmlunit.version>1.0</xmlunit.version>
@@ -418,6 +443,21 @@
 
     <profiles>
         <profile>
+          <id>build-with-grails-repository</id>
+          <activation>
+            <activeByDefault>true</activeByDefault>
+          </activation>
+          <repositories>
+              <repository>
+                  <releases>
+                      <enabled>false</enabled>
+                  </releases>
+                  <id>grails</id>
+                  <url>http://repo.grails.org/grails/core/</url>
+              </repository>
+          </repositories>
+        </profile>        
+        <profile>
             <id>integration-tests</id>
 
             <activation>
@@ -463,25 +503,9 @@
                 </plugins>
             </build>
 
-            <repositories>
-                <repository>
-                    <releases>
-                        <enabled>false</enabled>
-                    </releases>
-                    <id>codehaus.snapshots</id>
-                    <url>http://snapshots.repository.codehaus.org/</url>
-                </repository>
-            </repositories>
 
-            <pluginRepositories>
-                <pluginRepository>
-                    <releases>
-                        <enabled>false</enabled>
-                    </releases>
-                    <id>codehaus.snapshots</id>
-                    <url>http://snapshots.repository.codehaus.org/</url>
-                </pluginRepository>
-            </pluginRepositories>
+
+
             <properties>
                 <includeITs>**/pom4test.xml</includeITs>
                 <excludeITs>**/run-webtest/pom4test.xml</excludeITs>
@@ -586,27 +610,4 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <!-- Necessary to compensate for the fact that GPars 0.9 POM mistakenly
-            has non-optional dependency on netty. Excludes don't work because grails-maven-plugin
-            ignores them. -->
-        <repository>
-            <id>grails</id>
-            <url>http://repo.grails.org/grails/core</url>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>codehaus.org</id>
-            <name>Grails Main Repository</name>
-            <url>dav:https://dav.codehaus.org/repository/grails</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>codehaus.org</id>
-            <name>Grails Snapshots Repository</name>
-            <url>dav:https://dav.codehaus.org/snapshots.repository/grails</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
