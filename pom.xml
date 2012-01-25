@@ -443,21 +443,6 @@
 
     <profiles>
         <profile>
-          <id>build-with-grails-repository</id>
-          <activation>
-            <activeByDefault>true</activeByDefault>
-          </activation>
-          <repositories>
-              <repository>
-                  <releases>
-                      <enabled>false</enabled>
-                  </releases>
-                  <id>grails</id>
-                  <url>http://repo.grails.org/grails/core/</url>
-              </repository>
-          </repositories>
-        </profile>        
-        <profile>
             <id>integration-tests</id>
 
             <activation>
@@ -564,6 +549,15 @@
                     <family>Windows</family>
                 </os>
             </activation>
+          <repositories>
+              <repository>
+                  <releases>
+                      <enabled>true</enabled>
+                  </releases>
+                  <id>grailsRepo</id>
+                  <url>http://repo.grails.org/grails/core</url>
+              </repository>
+          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
@@ -581,6 +575,15 @@
                     <family>unix</family>
                 </os>
             </activation>
+          <repositories>
+              <repository>
+                  <releases>
+                      <enabled>true</enabled>
+                  </releases>
+                  <id>grailsRepo</id>
+                  <url>http://repo.grails.org/grails/core</url>
+              </repository>
+          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
@@ -598,6 +601,15 @@
                     <family>mac</family>
                 </os>
             </activation>
+          <repositories>
+              <repository>
+                  <releases>
+                      <enabled>true</enabled>
+                  </releases>
+                  <id>grailsRepo</id>
+                  <url>http://repo.grails.org/grails/core</url>
+              </repository>
+          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
