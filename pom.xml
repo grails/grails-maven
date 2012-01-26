@@ -25,9 +25,9 @@
         </license>    
     </licenses>
     <scm>
-      <url>http://github.com/grails/grails-maven-archetype</url>
-      <developerConnection>scm:git:git://github.com/grails/grails-maven-archetype.git</developerConnection>
-      <connection>scm:git:git@github.com:grails/grails-maven-archetype.git</connection>
+      <url>http://github.com/grails/grails-maven-plugin</url>
+      <developerConnection>scm:git:git://github.com/grails/grails-maven-plugin.git</developerConnection>
+      <connection>scm:git:git@github.com:grails/grails-maven-plugin.git</connection>
     </scm>
     <developers>
       <developer>
