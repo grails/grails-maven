@@ -201,13 +201,21 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
+        
+        
         InputStream currentIn = System.in;
         PrintStream currentOutput = System.out;
         try {
+
             final URL[] classpath = generateGrailsExecutionClasspath();
 
             final String grailsHomePath = (grailsHome != null) ? grailsHome.getAbsolutePath() : null;
             final RootLoader rootLoader = new RootLoader(classpath, ClassLoader.getSystemClassLoader());
+            System.setProperty("grails.console.enable.terminal", "false");
+            System.setProperty("grails.console.enable.interactive", "false");
+
+            Class cls = rootLoader.loadClass("org.springframework.util.Log4jConfigurer");
+            invokeStaticMethod(cls, "initLogging", new Object[] { "classpath:grails-maven/log4j.properties" });
             final GrailsLauncher launcher = new GrailsLauncher(rootLoader, grailsHomePath, basedir.getAbsolutePath());
             launcher.setPlainOutput(true);
             configureBuildSettings(launcher);
@@ -254,6 +262,27 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Invokes the named method on a target object using reflection.
+     * The method signature is determined by the classes of each argument.
+     * @param target The object to call the method on.
+     * @param name The name of the method to call.
+     * @param args The arguments to pass to the method (may be an empty array).
+     * @return The value returned by the method.
+     */
+    private Object invokeStaticMethod(Class target, String name, Object[] args) {
+        Class<?>[] argTypes = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argTypes[i] = args[i].getClass();
+        }
+
+        try {
+            return target.getMethod(name, argTypes).invoke(target, args);
+        }
+        catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
     /**
      * Generates the classpath to be used by the launcher to execute the requested Grails script.
      * @return An array of {@code URL} objects representing the dependencies required on the classpath to
@@ -303,12 +332,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             /*
              * Convert each resolved artifact into a URL/classpath element.
              */
-            final URL[] classpath = new URL[resolvedArtifacts.size() + 1];
+            final List<URL> classpath = new ArrayList<URL>();
             int index = 0;
             for (final Iterator<Artifact> iter = resolvedArtifacts.iterator(); iter.hasNext();) {
                 final File file = iter.next().getFile();
                 if(file != null) {
-                    classpath[index++] = file.toURI().toURL();
+                    classpath.add(file.toURI().toURL());
                 }
             }
 
@@ -326,9 +355,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 // to a JDK.
                 toolsJar = new File(javaHome, "tools.jar");
             }
-            classpath[classpath.length - 1] = toolsJar.toURI().toURL();
-
-            return classpath;
+            if(toolsJar.exists()) {
+                java.net.URL url = toolsJar.toURI().toURL();
+                if(url != null) {
+                    classpath.add(url);
+                }
+            }
+            return classpath.toArray(new URL[classpath.size()]);
         } catch(final Exception e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
