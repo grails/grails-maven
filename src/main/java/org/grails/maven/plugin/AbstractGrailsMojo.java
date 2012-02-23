@@ -45,6 +45,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
 import org.apache.maven.project.artifact.MavenMetadataSource;
+import org.apache.maven.settings.Proxy;
+import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
 import org.codehaus.plexus.logging.Logger;
@@ -105,6 +107,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @parameter expression="${grailsHome}"
      */
     protected File grailsHome;
+
+
+    /** The Maven settings reference.
+     *
+     * @parameter expression="${settings}"
+     * @required
+     * @readonly
+     */
+    protected Settings settings;
 
     /**
      * POM
@@ -205,7 +216,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         
         InputStream currentIn = System.in;
         PrintStream currentOutput = System.out;
+
         try {
+            configureMavenProxy();
 
             final URL[] classpath = generateGrailsExecutionClasspath();
 
@@ -259,6 +272,27 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             Terminal.resetTerminal();
             System.setIn(currentIn);
             System.setOut(currentOutput);
+        }
+    }
+
+    private void configureMavenProxy() {
+        if(settings != null) {
+            Proxy activeProxy = settings.getActiveProxy();
+            if(activeProxy != null) {
+                String host = activeProxy.getHost();
+                int port = activeProxy.getPort();
+                String username = activeProxy.getUsername();
+                String password = activeProxy.getPassword();
+
+                System.setProperty("http.proxyHost", host);
+                System.setProperty("http.proxyPort", String.valueOf(port));
+                if(username != null) {
+                    System.setProperty("http.proxyUser", username);
+                }
+                if(password != null) {
+                    System.setProperty("http.proxyPassword", password);
+                }
+            }
         }
     }
 
