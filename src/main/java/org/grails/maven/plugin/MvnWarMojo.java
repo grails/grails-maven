@@ -17,6 +17,7 @@ package org.grails.maven.plugin;
 
 import java.io.File;
 
+import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -41,8 +42,14 @@ public class MvnWarMojo extends AbstractGrailsMojo {
      * @throws MojoExecutionException if an error occured while building the webapp
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
-        final String warFileName = project.getArtifactId() + "-" + project.getVersion() + ".war";
-        warFile = new File(project.getBuild().getDirectory(), warFileName);
+
+
+        Build build = project.getBuild();
+        String warFileName = build.getFinalName() != null ? build.getFinalName() : project.getArtifactId() + "-" + project.getVersion();
+        if(!warFileName.endsWith(".war")) {
+            warFileName += ".war";
+        }
+        warFile = new File(build.getDirectory(), warFileName);
 
         runGrails("War", warFile.toString());
     }
