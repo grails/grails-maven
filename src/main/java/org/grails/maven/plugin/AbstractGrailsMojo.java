@@ -44,6 +44,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
@@ -360,8 +361,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             /*
              * Get the Grails dependencies from the plugin's POM file first.
              */
-            final Artifact pluginArtifact = findArtifact(this.project.getPluginArtifacts(), "org.grails", "grails-maven-plugin");
-            final MavenProject pluginProject = this.projectBuilder.buildFromRepository(pluginArtifact, this.remoteRepositories, this.localRepository);
+            final MavenProject pluginProject = getPluginProject();
 
             /*
              * Add the plugin's dependencies and the project using the plugin's dependencies to the list
@@ -379,8 +379,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             /*
              * Resolve each artifact.  This will get all transitive artifacts AND eliminate conflicts.
              */
-            for (final Iterator<Artifact> iter = unresolvedArtifacts.iterator(); iter.hasNext();) {
-                resolvedArtifacts.addAll(resolveDependenciesToArtifacts(iter.next(),unresolvedDependencies));
+            for (Artifact unresolvedArtifact : unresolvedArtifacts) {
+                resolvedArtifacts.addAll(resolveDependenciesToArtifacts(unresolvedArtifact, unresolvedDependencies));
             }
 
             /*
@@ -395,9 +395,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
              */
             final List<URL> classpath = new ArrayList<URL>();
             int index = 0;
-            for (final Iterator<Artifact> iter = resolvedArtifacts.iterator(); iter.hasNext();) {
-                final File file = iter.next().getFile();
-                if(file != null) {
+            for (Artifact resolvedArtifact : resolvedArtifacts) {
+                final File file = resolvedArtifact.getFile();
+                if (file != null) {
                     classpath.add(file.toURI().toURL());
                 }
             }
@@ -428,6 +428,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
+    private MavenProject getPluginProject() throws ProjectBuildingException {
+        final Artifact pluginArtifact = findArtifact(this.project.getPluginArtifacts(), "org.grails", "grails-maven-plugin");
+        return this.projectBuilder.buildFromRepository(pluginArtifact, this.remoteRepositories, this.localRepository);
+    }
+
     /**
      * Returns only the dependencies matching the supplied group ID value, filtering out
      * all others.
@@ -437,9 +442,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     private List<Dependency> filterDependencies(final List<Dependency> dependencies, final String groupId) {
         final List<Dependency> filteredDependencies = new ArrayList<Dependency>();
-        for(final Iterator<Dependency> iter = dependencies.iterator(); iter.hasNext();) {
-            final Dependency dependency = iter.next();
-            if(dependency.getGroupId().equals(groupId)) {
+        for (final Dependency dependency : dependencies) {
+            if (dependency.getGroupId().equals(groupId)) {
                 filteredDependencies.add(dependency);
             }
         }
@@ -497,7 +501,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @param launcher The {@code GrailsLauncher} instance to be configured.
      */
     @SuppressWarnings("unchecked")
-    private void configureBuildSettings(final GrailsLauncher launcher) {
+    private void configureBuildSettings(final GrailsLauncher launcher) throws ProjectBuildingException, MojoExecutionException {
         final String targetDir = this.project.getBuild().getDirectory();
         launcher.setDependenciesExternallyConfigured(true);
         launcher.setCompileDependencies(artifactsToFiles(this.project.getCompileArtifacts()));
@@ -508,6 +512,26 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         launcher.setTestClassesDir(new File(targetDir, "test-classes"));
         launcher.setResourcesDir(new File(targetDir, "resources"));
         launcher.setProjectPluginsDir(this.pluginsDir);
+
+        final MavenProject pluginProject = getPluginProject();
+        final List<Dependency> unresolvedDependencies = new ArrayList<Dependency>();
+        final Set<Artifact> resolvedArtifacts = new HashSet<Artifact>();
+
+        unresolvedDependencies.addAll(filterDependencies(pluginProject.getDependencies(), "org.grails"));
+
+        /*
+        * Convert the Maven dependencies into Maven artifacts so that they can be resolved.
+        */
+        final List<Artifact> unresolvedArtifacts = dependenciesToArtifacts(unresolvedDependencies);
+
+        /*
+        * Resolve each artifact.  This will get all transitive artifacts AND eliminate conflicts.
+        */
+        for (Artifact unresolvedArtifact : unresolvedArtifacts) {
+            resolvedArtifacts.addAll(resolveDependenciesToArtifacts(unresolvedArtifact, unresolvedDependencies));
+        }
+        List<File> files = artifactsToFiles(resolvedArtifacts);
+        launcher.setBuildDependencies(files);
     }
 
     /**
@@ -570,8 +594,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     private List<File> artifactsToFiles(final Collection<Artifact> artifacts) {
         final List<File> files = new ArrayList<File>(artifacts.size());
-        for (final Iterator<Artifact> iter = artifacts.iterator(); iter.hasNext();) {
-            files.add(iter.next().getFile());
+        for (Artifact artifact : artifacts) {
+            files.add(artifact.getFile());
         }
 
         return files;
@@ -586,8 +610,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * 	artifact ID value or {@code null} if no match is found.
      */
     private Artifact findArtifact(final Collection<Artifact> artifacts, final String groupId, final String artifactId) {
-        for (final Iterator<Artifact> iter = artifacts.iterator(); iter.hasNext();) {
-            final Artifact artifact = iter.next();
+        for (final Artifact artifact : artifacts) {
             if (artifact.getGroupId().equals(groupId) && artifact.getArtifactId().equals(artifactId)) {
                 return artifact;
             }
@@ -604,8 +627,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     private List<Artifact> dependenciesToArtifacts(final Collection<Dependency> deps) {
         final List<Artifact> artifacts = new ArrayList<Artifact>(deps.size());
-        for (final Iterator<Dependency> iter = deps.iterator(); iter.hasNext();) {
-            artifacts.add(dependencyToArtifact(iter.next()));
+        for (Dependency dep : deps) {
+            artifacts.add(dependencyToArtifact(dep));
         }
 
         return artifacts;
