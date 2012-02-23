@@ -68,6 +68,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String PLUGIN_PREFIX = "grails-";
 
 	private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
+    public static final String APP_GRAILS_VERSION = "app.grails.version";
 
     /**
      * The directory where is launched the mvn command.
@@ -236,7 +237,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // Search for all Grails plugin dependencies and install
             // any that haven't already been installed.
             final Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
-            boolean metadataModified = false;
+            boolean metadataModified = syncGrailsVersion(metadata);
+            
             for(@SuppressWarnings("unchecked")
             final Iterator<Artifact> iter = this.project.getDependencyArtifacts().iterator(); iter.hasNext();) {
                 final Artifact artifact = iter.next();
@@ -274,6 +276,31 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             System.setOut(currentOutput);
         }
     }
+
+    private boolean syncGrailsVersion(Metadata metadata) {
+        Object grailsVersion = metadata.get(APP_GRAILS_VERSION);
+
+        Artifact grailsDependency = findGrailsDependency(project);
+        if(grailsDependency != null) {
+            if(!grailsDependency.getVersion().equals(grailsVersion)) {
+                metadata.put(APP_GRAILS_VERSION, grailsDependency.getVersion());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Artifact findGrailsDependency(MavenProject project) {
+        Set dependencyArtifacts = project.getDependencyArtifacts();
+        for (Object o : dependencyArtifacts) {
+            Artifact artifact = (Artifact) o;
+            if(artifact.getArtifactId().equals("grails-dependencies")) {
+                return artifact;
+            }
+        }
+        return null;
+    }
+
 
     private void configureMavenProxy() {
         if(settings != null) {
