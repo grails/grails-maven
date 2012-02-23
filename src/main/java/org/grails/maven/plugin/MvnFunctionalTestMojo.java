@@ -27,7 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @goal maven-functional-test
  * @phase integration-test
  * @requiresProject true
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @since 1.0
  */
 public class MvnFunctionalTestMojo extends AbstractGrailsMojo {

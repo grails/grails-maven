@@ -26,7 +26,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @description Runs a Grails applications unit tests and integration tests.
  * @goal test-app
  * @requiresProject false
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @since 0.1
  */
 public class GrailsTestAppMojo extends AbstractGrailsMojo {
