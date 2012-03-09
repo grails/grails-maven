@@ -70,6 +70,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
 	private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
+    public static final String APP_VERSION = "app.version";
 
     /**
      * The directory where is launched the mvn command.
@@ -214,8 +215,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
-        
-        
+
+
         InputStream currentIn = System.in;
         PrintStream currentOutput = System.out;
 
@@ -238,8 +239,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // Search for all Grails plugin dependencies and install
             // any that haven't already been installed.
             final Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
-            boolean metadataModified = syncGrailsVersion(metadata);
-            
+            boolean metadataModified = syncVersions(metadata);
+
             for(@SuppressWarnings("unchecked")
             final Iterator<Artifact> iter = this.project.getDependencyArtifacts().iterator(); iter.hasNext();) {
                 final Artifact artifact = iter.next();
@@ -248,7 +249,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 }
             }
 
-            if (metadataModified) 
+            if (metadataModified)
 				metadata.persist();
 
             // If the command is running in non-interactive mode, we
@@ -278,17 +279,27 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
-    private boolean syncGrailsVersion(Metadata metadata) {
-        Object grailsVersion = metadata.get(APP_GRAILS_VERSION);
+    private boolean syncVersions(Metadata metadata) {
+        boolean result = false;
 
+        Object grailsVersion = metadata.get(APP_GRAILS_VERSION);
         Artifact grailsDependency = findGrailsDependency(project);
         if(grailsDependency != null) {
             if(!grailsDependency.getVersion().equals(grailsVersion)) {
                 metadata.put(APP_GRAILS_VERSION, grailsDependency.getVersion());
-                return true;
+                result = true;
             }
         }
-        return false;
+
+        Object appVersion = metadata.get(APP_VERSION);
+        if (appVersion != null) {
+            if (!project.getVersion().equals(appVersion)) {
+                metadata.put(Metadata.APPLICATION_VERSION, project.getVersion());
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     private Artifact findGrailsDependency(MavenProject project) {
