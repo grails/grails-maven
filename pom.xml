@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.grails</groupId>
     <artifactId>grails-maven-plugin</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.3</version>
     <packaging>maven-plugin</packaging>
 
     <name>Maven plugin for GRAILS applications</name>
@@ -48,7 +48,7 @@
         <maven.version>2.0.5</maven.version>
 
         <!-- Dependencies -->
-        <grails.version>2.0.1</grails.version>
+        <grails.version>2.0.3</grails.version>
         <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
         <grails-core.version>${grails.version}</grails-core.version>
         <grails-scripts.version>${grails.version}</grails-scripts.version>
@@ -97,6 +97,12 @@
             <groupId>org.grails</groupId>
             <artifactId>grails-bootstrap</artifactId>
             <version>${grails-bootstrap.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.uaa</groupId>
+                    <artifactId>org.springframework.uaa.client</artifactId>
+                </exclusion>
+            </exclusions>            
         </dependency>
 
         <dependency>
@@ -135,6 +141,10 @@
                     <groupId>org.grails</groupId>
                     <artifactId>grails-plugin-log4j</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.grails</groupId>
+                    <artifactId>grails-docs</artifactId>
+                </exclusion>                
             </exclusions>            
         </dependency>
 
@@ -162,8 +172,20 @@
                     <groupId>org.hibernate.java-persistence</groupId>
                     <artifactId>jpa-api</artifactId>
                 </exclusion>
+                <exclusion>
+                       <groupId>org.eclipse.jdt.core.compiler</groupId>
+                       <artifactId>ecj</artifactId>
+                </exclusion>                
             </exclusions>
         </dependency>
+        
+        <dependency>
+            <groupId>org.eclipse.jdt.core.compiler</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.7.1</version>            
+            <scope>runtime</scope>
+        </dependency>
+        
 
         <!-- Required by the "create-pom" goal because it contains the template
             POM for a Grails project. -->
@@ -546,15 +568,6 @@
                     <family>Windows</family>
                 </os>
             </activation>
-          <repositories>
-              <repository>
-                  <releases>
-                      <enabled>true</enabled>
-                  </releases>
-                  <id>grailsRepo</id>
-                  <url>http://repo.grails.org/grails/core</url>
-              </repository>
-          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
@@ -572,15 +585,6 @@
                     <family>unix</family>
                 </os>
             </activation>
-          <repositories>
-              <repository>
-                  <releases>
-                      <enabled>true</enabled>
-                  </releases>
-                  <id>grailsRepo</id>
-                  <url>http://repo.grails.org/grails/core</url>
-              </repository>
-          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
@@ -598,15 +602,6 @@
                     <family>mac</family>
                 </os>
             </activation>
-          <repositories>
-              <repository>
-                  <releases>
-                      <enabled>true</enabled>
-                  </releases>
-                  <id>grailsRepo</id>
-                  <url>http://repo.grails.org/grails/core</url>
-              </repository>
-          </repositories>
             <dependencies>
                 <dependency>
                     <groupId>com.sun</groupId>
