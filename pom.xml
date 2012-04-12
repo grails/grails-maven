@@ -48,6 +48,7 @@
         <maven.version>2.0.5</maven.version>
 
         <!-- Dependencies -->
+        <groovy.version>1.8.5</groovy.version>
         <grails.version>2.0.3</grails.version>
         <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
         <grails-core.version>${grails.version}</grails-core.version>
@@ -93,6 +94,11 @@
             <version>1.0</version>
         </dependency>
                 
+        <dependency>
+             <groupId>org.codehaus.groovy</groupId>
+             <artifactId>groovy-all</artifactId>
+             <version>1.8.6</version>
+         </dependency>                
         <dependency>
             <groupId>org.grails</groupId>
             <artifactId>grails-bootstrap</artifactId>
