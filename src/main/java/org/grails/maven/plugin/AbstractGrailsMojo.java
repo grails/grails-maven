@@ -19,7 +19,6 @@ package org.grails.maven.plugin;
 import grails.util.Metadata;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
@@ -48,10 +47,6 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.artifact.MavenMetadataSource;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
-import org.codehaus.plexus.archiver.ArchiverException;
-import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.grails.launcher.GrailsLauncher;
 import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.tools.GrailsServices;
@@ -90,7 +85,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * The Grails work directory to use.
      *
-     * @parameter expression="${grails.grailsWorkDir}"
+     * @parameter expression="${grails.grailsWorkDir}" default-value="${project.build.directory}/work"
      */
     protected String grailsWorkDir;
 
@@ -247,15 +242,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // any that haven't already been installed.
             final Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
             boolean metadataModified = syncVersions(metadata);
-
-            for(@SuppressWarnings("unchecked")
-            final Iterator<Artifact> iter = this.project.getDependencyArtifacts().iterator(); iter.hasNext();) {
-                final Artifact artifact = iter.next();
-                if (artifact.getType() != null && (artifact.getType().equals("grails-plugin") || artifact.getType().equals("zip"))) {
-                    metadataModified |= installGrailsPlugin(artifact, metadata,  launcher);
-                }
-            }
-
+            
             if (metadataModified)
 				metadata.persist();
 
@@ -402,13 +389,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             }
 
             /*
-             * Remove any Grails plugins that may be in the resolved artifact set.  This is because we
-             * do not need them on the classpath, as they will be handled later on by a separate call to
-             * "install" them.
-             */
-            removePluginArtifacts(resolvedArtifacts);
-
-            /*
              * Convert each resolved artifact into a URL/classpath element.
              */
             final List<URL> classpath = new ArrayList<URL>();
@@ -522,9 +502,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     private void configureBuildSettings(final GrailsLauncher launcher) throws ProjectBuildingException, MojoExecutionException {
         final String targetDir = this.project.getBuild().getDirectory();
         launcher.setDependenciesExternallyConfigured(true);
-        launcher.setCompileDependencies(artifactsToFiles(this.project.getCompileArtifacts()));
-        launcher.setTestDependencies(artifactsToFiles(this.project.getTestArtifacts()));
-        launcher.setRuntimeDependencies(artifactsToFiles(this.project.getRuntimeArtifacts()));
+        launcher.setProvidedDependencies(artifactsToFiles(getProvidedArtifacts(project)));
+        launcher.setCompileDependencies(artifactsToFiles(getCompileArtifacts(this.project)));
+        launcher.setTestDependencies(artifactsToFiles(getTestArtifacts(project)));
+        launcher.setRuntimeDependencies(artifactsToFiles(getRuntimeArtifacts(project)));
         launcher.setGrailsWorkDir(new File(grailsWorkDir));
         launcher.setProjectWorkDir(new File(targetDir));
         launcher.setClassesDir(new File(targetDir, "classes"));
@@ -553,55 +534,45 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         launcher.setBuildDependencies(files);
     }
 
-    /**
-     * Installs a Grails plugin into the current project if it isn't
-     * already installed. It works by simply unpacking the plugin
-     * artifact (a ZIP file) into the appropriate location and adding
-     * the plugin to the application's metadata.
-     * @param plugin The plugin artifact to install.
-     * @param metadata The application metadata. An entry for the plugin
-     * is added to this if the installation is successful.
-     * @param launcher The launcher instance that contains information about
-     * the various project directories. In particular, this is where the
-     * method gets the location of the project's "plugins" directory
-     * from.
-     * @return <code>true</code> if the plugin is installed and the
-     * metadata updated, otherwise <code>false</code>.
-     * @throws IOException
-     * @throws ArchiverException
-     */
-    private boolean installGrailsPlugin(
-            final Artifact plugin,
-            final Metadata metadata,
-            final GrailsLauncher launcher) throws IOException, ArchiverException {
-        String pluginName = plugin.getArtifactId();
-        final String pluginVersion = plugin.getVersion();
+    private Collection<Artifact> getRuntimeArtifacts(MavenProject project) {
+        List runtimeArtifacts = project.getRuntimeArtifacts();
+        List<Artifact> artifacts = new ArrayList<Artifact>(runtimeArtifacts);
 
-        if (pluginName.startsWith(PLUGIN_PREFIX)) {
-            pluginName = pluginName.substring(PLUGIN_PREFIX.length());
-        }
-        getLog().info("Installing plugin " + pluginName + ":" + pluginVersion);
+        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "runtime");
+        return artifacts;
+    }
 
-        // The directory the plugin will be unzipped to.
-        final File targetDir = new File(launcher.getProjectPluginsDir(), pluginName + "-" + pluginVersion);
+    private Collection<Artifact> getTestArtifacts(MavenProject project) {
+        List testArtifacts = project.getTestArtifacts();
+        List<Artifact> artifacts = new ArrayList<Artifact>(testArtifacts);
 
-        // Unpack the plugin if it hasn't already been.
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
+        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "test");
+        return artifacts;
+    }
 
-            final ZipUnArchiver unzipper = new ZipUnArchiver();
-            unzipper.enableLogging(new ConsoleLogger(Logger.LEVEL_ERROR, "zip-unarchiver"));
-            unzipper.setSourceFile(plugin.getFile());
-            unzipper.setDestDirectory(targetDir);
-            unzipper.setOverwrite(true);
-            unzipper.extract();
+    private Collection<Artifact> getCompileArtifacts(MavenProject project) {
+        List compileArtifacts = project.getCompileArtifacts();
+        List<Artifact> artifacts = new ArrayList<Artifact>(compileArtifacts);
 
-            // Now add it to the application metadata.
-            getLog().debug("Updating project metadata");
-			metadata.setProperty(String.format(GRAILS_PLUGIN_NAME_FORMAT, plugin.getGroupId(), pluginName), pluginVersion);
-            return true;
-        } else {
-            return false;
+        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "compile");
+        return artifacts;
+    }
+
+    private Collection<Artifact> getProvidedArtifacts(MavenProject project) {
+        Set dependencyArtifacts = project.getDependencyArtifacts();
+        List<Artifact> provided = new ArrayList<Artifact>();
+
+        copyScopedDependenciesToTarget(dependencyArtifacts, provided, "provided");
+        return provided;
+    }
+
+    private void copyScopedDependenciesToTarget(Set dependencyArtifacts, List<Artifact> targetArtifacts, String scope) {
+        for (Object dependencyArtifact : dependencyArtifacts) {
+            Artifact artifact = (Artifact) dependencyArtifact;
+
+            if(artifact.getScope().equals(scope)) {
+                targetArtifacts.add(artifact);
+            }
         }
     }
 
@@ -667,20 +638,4 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 "pom");
     }
 
-    /**
-     * Removes any Grails plugin artifacts from the supplied list
-     * of dependencies.  A Grails plugin is any artifact whose type
-     * is equal to "grails-plugin" or "zip".
-     * @param artifact The list of artifacts to be cleansed.
-     */
-    private void removePluginArtifacts(final Set<Artifact> artifact) {
-        if(artifact != null) {
-            for (final Iterator<Artifact> iter = artifact.iterator(); iter.hasNext();) {
-                final Artifact dep = iter.next();
-                if (dep.getType() != null && (dep.getType().equals("grails-plugin") || dep.getType().equals("zip"))) {
-                    iter.remove();
-                }
-            }
-        }
-    }
 }
