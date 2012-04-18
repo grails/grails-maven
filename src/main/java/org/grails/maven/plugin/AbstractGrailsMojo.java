@@ -88,6 +88,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected String env;
 
     /**
+     * The Grails work directory to use.
+     *
+     * @parameter expression="${grails.grailsWorkDir}"
+     */
+    protected String grailsWorkDir;
+
+    /**
      * Whether to run Grails in non-interactive mode or not. The default
      * is to run interactively, just like the Grails command-line.
      *
@@ -518,6 +525,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         launcher.setCompileDependencies(artifactsToFiles(this.project.getCompileArtifacts()));
         launcher.setTestDependencies(artifactsToFiles(this.project.getTestArtifacts()));
         launcher.setRuntimeDependencies(artifactsToFiles(this.project.getRuntimeArtifacts()));
+        launcher.setGrailsWorkDir(new File(grailsWorkDir));
         launcher.setProjectWorkDir(new File(targetDir));
         launcher.setClassesDir(new File(targetDir, "classes"));
         launcher.setTestClassesDir(new File(targetDir, "test-classes"));
