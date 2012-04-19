@@ -54,6 +54,15 @@ public class GrailsPackagePluginMojo extends AbstractGrailsMojo {
      */
     protected ArtifactHandler artifactHandler;
 
+    /**
+     * The artifact handler.
+     *
+     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-binary-plugin}"
+     * @required
+     * @readonly
+     */
+    protected ArtifactHandler binaryArtifactHandler;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         // First package the plugin using the Grails script.
         runGrails("PackagePlugin");
@@ -64,6 +73,20 @@ public class GrailsPackagePluginMojo extends AbstractGrailsMojo {
         if (!zipFileName.startsWith(PLUGIN_PREFIX)) zipFileName = PLUGIN_PREFIX + zipFileName;
 
         File zipGeneratedByGrails = new File(getBasedir(), zipFileName);
+        ArtifactHandler handler = artifactHandler;
+
+        if(!zipGeneratedByGrails.exists()) {
+            // try binary jar
+            final String targetDir = this.project.getBuild().getDirectory();
+            File jarFile = new File(targetDir, "grails-plugin-" + project.getArtifactId() + "-" + project.getVersion() + ".jar");
+            if(jarFile.exists()) {
+
+                zipGeneratedByGrails = jarFile;
+                zipFileName = project.getArtifactId() + "-" + project.getVersion() + ".jar";
+                handler = binaryArtifactHandler;
+            }
+
+        }
 
         File mavenZipFile = new File(project.getBuild().getDirectory(), zipFileName);
         mavenZipFile.delete();
@@ -76,6 +99,6 @@ public class GrailsPackagePluginMojo extends AbstractGrailsMojo {
         // Attach the zip file to the "grails-plugin" artifact, otherwise
         // the "install" and "deploy" phases won't work.
         artifact.setFile(mavenZipFile);
-        artifact.setArtifactHandler(artifactHandler);
+        artifact.setArtifactHandler(handler);
     }
 }
