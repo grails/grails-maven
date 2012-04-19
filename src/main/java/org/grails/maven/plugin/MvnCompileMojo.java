@@ -25,7 +25,6 @@ import org.apache.maven.plugin.MojoFailureException;
  * @version $Id$
  * @description Compiles a Grails project.
  * @goal maven-compile
- * @phase compile
  * @requiresProject true
  * @requiresDependencyResolution
  * @since 0.1
