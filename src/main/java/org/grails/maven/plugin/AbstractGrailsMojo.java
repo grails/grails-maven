@@ -98,6 +98,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     protected boolean nonInteractive;
 
+	/**
+	 * Turns on/off stacktraces in the console output for Grails commands.
+	 *
+	 * @parameter expression="${showStacktrace}" default-value="false"
+	 */
+	protected boolean showStacktrace;
+
     /**
      * The directory where plugins are stored.
      *
@@ -249,7 +256,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // If the command is running in non-interactive mode, we
             // need to pass on the relevant argument.
             if (this.nonInteractive) {
-                args = (args != null) ? "--non-interactive" + args : "--non-interactive ";
+                args = (args != null) ? "--non-interactive " + args : "--non-interactive ";
+            }
+
+			// If the project has specified to print stacktraces to the console
+			// turn on the flag in the arguments.
+            if(this.showStacktrace) {
+	            args = (args != null) ? "--stacktrace " + args : "--stacktrace ";
             }
 
 			// Enable the plain output for the Grails command to fix an issue with JLine
