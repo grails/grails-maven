@@ -85,7 +85,7 @@ public class MvnTestMojo extends AbstractGrailsMojo {
         }
 
         try {
-            runGrails("TestApp", "--unit --integration");
+            runGrails("TestApp", "--unit");
         } catch (MojoExecutionException me) {
             if (!testFailureIgnore) {
                 throw me;
