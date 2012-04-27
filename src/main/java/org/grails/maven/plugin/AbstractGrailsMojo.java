@@ -84,6 +84,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected String env;
 
     /**
+     * The Grails environment to use.
+     *
+     * @parameter expression="${environment}"
+     */
+    protected String grailsEnv;
+
+    /**
      * The Grails work directory to use.
      *
      * @parameter expression="${grails.grailsWorkDir}" default-value="${project.build.directory}/work"
@@ -213,6 +220,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return this.basedir;
     }
 
+    protected String getEnvironment() {
+       if(env == null) {
+           return grailsEnv;
+       }
+       return env;
+    }
+
     /**
      * Returns the {@code GrailsServices} instance used by the plugin with the base directory
      * of the services object set to the configured base directory.
@@ -280,7 +294,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setArgs(args);
             ec.setScriptName(targetName);
             ec.setBaseDir(project.getBasedir());
-            ec.setEnv(env);
+            ec.setEnv(getEnvironment());
             ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
             fgr.setDebug(forkDebug);
             try {
@@ -337,7 +351,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // consuming the standard output after execution via Maven.
             args = (args != null) ? "--plain-output " + args : "--plain-output";
 
-            final int retval = launcher.launch(targetName, args, env);
+            final int retval = launcher.launch(targetName, args, getEnvironment());
             if (retval != 0) {
                 throw new MojoExecutionException("Grails returned non-zero value: " + retval);
             }

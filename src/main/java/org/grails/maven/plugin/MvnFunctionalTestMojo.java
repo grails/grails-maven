@@ -74,7 +74,7 @@ public class MvnFunctionalTestMojo extends AbstractGrailsMojo {
 
         try {
 
-            if(env == null) {
+            if(getEnvironment() == null) {
                 env = "test";
             }
             runGrails("TestApp", ":unit :integration :functional");

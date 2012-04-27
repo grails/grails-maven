@@ -32,7 +32,7 @@ import org.apache.maven.plugin.MojoFailureException;
 public class GrailsWarMojo extends AbstractGrailsMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if(env == null) {
+        if(getEnvironment() == null) {
             env = "prod";
         }
 

@@ -76,8 +76,8 @@ public class MvnTestMojo extends AbstractGrailsMojo {
         // the tests
         // -----------------------------------------------------------------------
 
-        if (mavenSkip == null && env != null) {
-            if (env.equals("test") || env.startsWith("prod")) {
+        if (mavenSkip == null && getEnvironment() != null) {
+            if (env.equals("test") || getEnvironment().startsWith("prod")) {
                 getLog().info("Skipping tests as the current environment is set to test or production.");
                 getLog().info("Set maven.test.skip to false to prevent this behaviour");
 
@@ -86,7 +86,7 @@ public class MvnTestMojo extends AbstractGrailsMojo {
         }
 
         try {
-            if(env == null) {
+            if(getEnvironment() == null) {
                 env = "test";
             }
             runGrails("TestApp", "--unit");
