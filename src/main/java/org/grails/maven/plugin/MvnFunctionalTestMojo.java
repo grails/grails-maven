@@ -73,6 +73,10 @@ public class MvnFunctionalTestMojo extends AbstractGrailsMojo {
         }
 
         try {
+
+            if(env == null) {
+                env = "test";
+            }
             runGrails("TestApp", ":unit :integration :functional");
         } catch (MojoExecutionException me) {
             if (!testFailureIgnore) {

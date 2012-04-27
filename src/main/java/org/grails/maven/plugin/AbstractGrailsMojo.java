@@ -231,7 +231,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @param targetName The name of the Grails target to execute.
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
-    protected void runGrails(final String targetName) throws MojoExecutionException, ProjectBuildingException {
+    protected void runGrails(final String targetName) throws MojoExecutionException {
         runGrails(targetName, null);
     }
 
@@ -243,7 +243,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @param args       String of arguments to be passed to the executed Grails target.
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
-    protected void runGrails(final String targetName, String args) throws MojoExecutionException, ProjectBuildingException {
+    protected void runGrails(final String targetName, String args) throws MojoExecutionException {
 
 
         if (fork) {

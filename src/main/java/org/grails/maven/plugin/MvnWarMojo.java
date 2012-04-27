@@ -51,6 +51,10 @@ public class MvnWarMojo extends AbstractGrailsMojo {
         }
         warFile = new File(build.getDirectory(), warFileName);
 
+        if(env == null) {
+            env = "prod";
+        }
+
         runGrails("War", warFile.toString());
     }
 }
