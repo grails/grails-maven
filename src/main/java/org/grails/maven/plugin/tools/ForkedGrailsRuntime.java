@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,6 +25,7 @@ public class ForkedGrailsRuntime {
     private int maxMemory = 1024;
     private int minMemory = 512;
     private int maxPerm = 256;
+    private boolean debug;
 
     public ForkedGrailsRuntime(ExecutionContext executionContext) {
         this.executionContext = executionContext;
@@ -39,6 +41,10 @@ public class ForkedGrailsRuntime {
 
     public void setMaxPerm(int maxPerm) {
         this.maxPerm = maxPerm;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public void fork() {
@@ -60,16 +66,27 @@ public class ForkedGrailsRuntime {
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(executionContext);
 
+
+            List<String> cmd = new ArrayList<String>(Arrays.asList("java", "-Xmx" + maxMemory + "M", "-Xms" + minMemory + "M", "-XX:MaxPermSize=" + maxPerm + "m", "-Dgrails.build.execution.context=" + tempFile.getCanonicalPath(), "-cp", cp.toString()));
+            if(debug) {
+                cmd.addAll(Arrays.asList("-Xdebug","-Xnoagent","-Dgrails.full.stacktrace=true", "-Djava.compiler=NONE", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"));
+            }
+            cmd.add(getClass().getName());
             processBuilder
                     .directory(executionContext.baseDir)
                     .redirectErrorStream(true)
-                    .command("java", "-Xmx"+maxMemory+"M", "-Xms"+minMemory+"M", "-XX:MaxPermSize="+maxPerm+"m", "-Dgrails.build.execution.context=" + tempFile.getCanonicalPath(),  "-cp", cp.toString(), "org.grails.maven.plugin.tools.ForkedGrailsRuntime");
+                    .command(cmd);
 
             Process process = processBuilder.start();
 
-            TextDumper td = new TextDumper(process.getInputStream(), System.out);
-            new Thread(td).start();
-            process.waitFor();
+            new Thread(new TextDumper(process.getInputStream(), System.out)).start();
+            new Thread(new TextDumper(process.getErrorStream(), System.err)).start();
+
+            int result = process.waitFor();
+            if(result == 1) {
+
+                throw new RuntimeException("Forked Grails VM exited with error");
+            }
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
         } catch (IOException e) {
@@ -100,6 +117,23 @@ public class ForkedGrailsRuntime {
                 final RootLoader rootLoader = new RootLoader(urls, ClassLoader.getSystemClassLoader());
                 System.setProperty("grails.console.enable.terminal", "false");
                 System.setProperty("grails.console.enable.interactive", "false");
+
+                List<File> loggingBootstrapJars = new ArrayList<File>();
+                for (File file : ec.getCompileDependencies()) {
+                    String name = file.getName();
+                    if(name.contains("slf4j") || name.contains("log4j") || name.contains("spring-core")) {
+                        loggingBootstrapJars.add(file);
+                    }
+                }
+                if(!loggingBootstrapJars.isEmpty()) {
+                    for (File loggingBootstrapJar : loggingBootstrapJars) {
+                        rootLoader.addURL(loggingBootstrapJar.toURI().toURL());
+                    }
+                    Class cls = rootLoader.loadClass("org.springframework.util.Log4jConfigurer");
+                    invokeStaticMethod(cls, "initLogging", new Object[]{"classpath:grails-maven/log4j.properties"});
+                }
+
+
                 final GrailsLauncher launcher = new GrailsLauncher(rootLoader, null, ec.getBaseDir().getAbsolutePath());
                 launcher.setPlainOutput(true);
                 launcher.setDependenciesExternallyConfigured(true);
@@ -117,12 +151,15 @@ public class ForkedGrailsRuntime {
                 System.exit( launcher.launch(ec.getScriptName(), ec.getArgs(), ec.getEnv()) );
 
             } catch (FileNotFoundException e) {
-                throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
+                fatalError(e);
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
+                fatalError(e);
             } catch (IOException e) {
-                throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
-            } finally {
+                fatalError(e);
+            } catch( Throwable e) {
+                fatalError(e);
+            }
+            finally {
                 if(fis != null)  {
                     try {
                         fis.close();
@@ -135,6 +172,12 @@ public class ForkedGrailsRuntime {
         else {
             System.exit(1);
         }
+    }
+
+    protected static void fatalError(Throwable e) {
+        System.err.println("Fatal error forking Grails JVM: " + e.getMessage());
+        e.printStackTrace(System.err);
+        System.exit(1);
     }
 
     private static URL[] generateBuildPath(List<File> systemDependencies) {

@@ -114,6 +114,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected boolean fork = false;
 
     /**
+     * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkDebug}" default-value="false"
+     */
+    protected boolean forkDebug = false;
+
+    /**
      * The directory where plugins are stored.
      *
      * @parameter expression="${pluginsDirectory}" default-value="${basedir}/plugins"
@@ -275,7 +282,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setBaseDir(project.getBasedir());
             ec.setEnv(env);
             ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
-            fgr.fork();
+            fgr.setDebug(forkDebug);
+            try {
+                fgr.fork();
+            } catch (Exception e) {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
         } else {
             runGrailsInline(targetName, args);
         }
