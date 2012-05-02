@@ -118,27 +118,15 @@ public class ForkedGrailsRuntime {
                 System.setProperty("grails.console.enable.terminal", "false");
                 System.setProperty("grails.console.enable.interactive", "false");
 
-                List<File> loggingBootstrapJars = new ArrayList<File>();
-                for (File file : ec.getCompileDependencies()) {
-                    String name = file.getName();
-                    if(name.contains("slf4j") || name.contains("log4j") || name.contains("spring-core")) {
-                        loggingBootstrapJars.add(file);
-                    }
-                }
-                if(!loggingBootstrapJars.isEmpty()) {
-                    for (File loggingBootstrapJar : loggingBootstrapJars) {
-                        rootLoader.addURL(loggingBootstrapJar.toURI().toURL());
-                    }
-                    Class cls = rootLoader.loadClass("org.springframework.util.Log4jConfigurer");
-                    invokeStaticMethod(cls, "initLogging", new Object[]{"classpath:grails-maven/log4j.properties"});
-                }
+                List<File> compileDependencies = ec.getCompileDependencies();
+                addLoggingJarsToRootLoader(rootLoader, compileDependencies);
 
 
                 final GrailsLauncher launcher = new GrailsLauncher(rootLoader, null, ec.getBaseDir().getAbsolutePath());
                 launcher.setPlainOutput(true);
                 launcher.setDependenciesExternallyConfigured(true);
                 launcher.setProvidedDependencies(ec.getProvidedDependencies());
-                launcher.setCompileDependencies(ec.getCompileDependencies());
+                launcher.setCompileDependencies(compileDependencies);
                 launcher.setTestDependencies(ec.getTestDependencies());
                 launcher.setRuntimeDependencies(ec.getRuntimeDependencies());
                 launcher.setGrailsWorkDir(ec.getGrailsWorkDir());
@@ -171,6 +159,23 @@ public class ForkedGrailsRuntime {
         }
         else {
             System.exit(1);
+        }
+    }
+
+    public static void addLoggingJarsToRootLoader(RootLoader rootLoader, List<File> compileDependencies) throws MalformedURLException, ClassNotFoundException {
+        List<File> loggingBootstrapJars = new ArrayList<File>();
+        for (File file : compileDependencies) {
+            String name = file.getName();
+            if(name.contains("slf4j") || name.contains("log4j") || name.contains("spring-core")) {
+                loggingBootstrapJars.add(file);
+            }
+        }
+        if(!loggingBootstrapJars.isEmpty()) {
+            for (File loggingBootstrapJar : loggingBootstrapJars) {
+                rootLoader.addURL(loggingBootstrapJar.toURI().toURL());
+            }
+            Class cls = rootLoader.loadClass("org.springframework.util.Log4jConfigurer");
+            invokeStaticMethod(cls, "initLogging", new Object[]{"classpath:grails-maven/log4j.properties"});
         }
     }
 
