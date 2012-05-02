@@ -106,12 +106,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     protected boolean nonInteractive;
 
-    /**
-     * Turns on/off stacktraces in the console output for Grails commands.
-     *
-     * @parameter expression="${showStacktrace}" default-value="false"
-     */
-    protected boolean showStacktrace;
+	/**
+	 * Turns on/off stacktraces in the console output for Grails commands.
+	 *
+	 * @parameter expression="${showStacktrace}" default-value="false"
+	 */
+	protected boolean showStacktrace;
 
     /**
      * Whether the JVM is forked for executing Grails commands
