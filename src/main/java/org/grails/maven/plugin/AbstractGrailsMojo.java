@@ -246,7 +246,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName) throws MojoExecutionException {
-        runGrails(targetName, null);
+        runGrails(targetName, System.getProperty("grails.cli.args"));
     }
 
     /**
