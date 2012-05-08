@@ -32,6 +32,6 @@ import org.apache.maven.plugin.MojoFailureException;
 public class GrailsConsoleMojo extends AbstractGrailsMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails("Console", null);
+        runGrails("Console");
     }
 }
