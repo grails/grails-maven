@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -35,9 +34,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactCollector;
-import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
+import org.apache.maven.artifact.resolver.*;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -264,10 +261,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             final String targetDir = this.project.getBuild().getDirectory();
             ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
             ec.setBuildDependencies(resolveGrailsExecutionPathJars(true));
-            ec.setProvidedDependencies(artifactsToFiles(getProvidedArtifacts(project)));
-            ec.setCompileDependencies(artifactsToFiles(getCompileArtifacts(this.project)));
-            ec.setTestDependencies(artifactsToFiles(getTestArtifacts(project)));
-            ec.setRuntimeDependencies(artifactsToFiles(getRuntimeArtifacts(project)));
+            List<File> providedDependencies = resolveArtifacts(getProvidedArtifacts(project));
+            ec.setProvidedDependencies(providedDependencies);
+            ec.setCompileDependencies(resolveArtifacts(getCompileArtifacts(this.project)));
+            ec.setTestDependencies(resolveArtifacts(getTestArtifacts(project)));
+            ec.setRuntimeDependencies(resolveArtifacts(getRuntimeArtifacts(project)));
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
             ec.setClassesDir(new File(targetDir, "classes"));
@@ -305,6 +303,40 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } else {
             runGrailsInline(targetName, args);
         }
+    }
+
+
+    /**
+     * Resolves artifacts to files including transitive resolution
+     *
+     * @param artifacts The artifacts
+     * @return
+     * @throws MojoExecutionException
+     */
+    protected List<File> resolveArtifacts(Collection<Artifact> artifacts) throws MojoExecutionException {
+        try {
+            ArtifactResolutionResult result = artifactCollector.collect(new HashSet<Artifact>(artifacts),
+                    project.getArtifact(),
+                    this.localRepository,
+                    this.remoteRepositories,
+                    this.artifactMetadataSource,
+                    null,
+                    Collections.EMPTY_LIST);
+            Set<Artifact> newArtifacts = result.getArtifacts();
+            //resolve all dependencies transitively to obtain a comprehensive list of assemblies
+            for (final Artifact currentArtifact : newArtifacts) {
+                if (!currentArtifact.getArtifactId().equals("tools") && !currentArtifact.getGroupId().equals("com.sun")) {
+                    this.artifactResolver.resolve(currentArtifact, this.remoteRepositories, this.localRepository);
+                }
+            }
+            return artifactsToFiles(newArtifacts);
+        } catch (ArtifactResolutionException e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        } catch (ArtifactNotFoundException e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        }
+
+
     }
 
     protected void runGrailsInline(String targetName, String args) throws MojoExecutionException {
@@ -645,8 +677,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             artifacts.add(project.getArtifact());
 
             //resolve all dependencies transitively to obtain a comprehensive list of assemblies
-            for (final Iterator<Artifact> iter = artifacts.iterator(); iter.hasNext(); ) {
-                final Artifact currentArtifact = iter.next();
+            for (final Artifact currentArtifact : artifacts) {
                 if (!currentArtifact.getArtifactId().equals("tools") && !currentArtifact.getGroupId().equals("com.sun")) {
                     this.artifactResolver.resolve(currentArtifact, this.remoteRepositories, this.localRepository);
                 }
@@ -752,7 +783,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     private List<File> artifactsToFiles(final Collection<Artifact> artifacts) {
         final List<File> files = new ArrayList<File>(artifacts.size());
         for (Artifact artifact : artifacts) {
-            files.add(artifact.getFile());
+            File file = artifact.getFile();
+            String name = file.getName();
+            if(file != null && !name.contains("xml-apis") && !name.contains("commons-logging"))
+                files.add(file);
         }
 
         return files;

@@ -94,7 +94,6 @@ public class ForkedGrailsRuntime {
                 try { is.close(); } catch (IOException ignore) {}
 
 
-                Thread.sleep(1000);
                 throw new RuntimeException("Forked Grails VM exited with error");
             }
         } catch (FileNotFoundException e) {
