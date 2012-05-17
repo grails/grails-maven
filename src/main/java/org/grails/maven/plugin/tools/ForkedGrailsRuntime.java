@@ -74,17 +74,27 @@ public class ForkedGrailsRuntime {
             cmd.add(getClass().getName());
             processBuilder
                     .directory(executionContext.baseDir)
-                    .redirectErrorStream(true)
+                    .redirectErrorStream(false)
                     .command(cmd);
 
             Process process = processBuilder.start();
 
-            new Thread(new TextDumper(process.getInputStream(), System.out)).start();
-            new Thread(new TextDumper(process.getErrorStream(), System.err)).start();
+            InputStream is = process.getInputStream();
+            InputStream es = process.getErrorStream();
+            Thread t1 = new Thread(new TextDumper(is, System.out));
+            Thread t2 = new Thread(new TextDumper(es, System.err));
+            t1.start();
+            t2.start();
 
             int result = process.waitFor();
             if(result == 1) {
+                try { t1.join(); } catch (InterruptedException ignore) {}
+                try { t1.join(); } catch (InterruptedException ignore) {}
+                try { es.close(); } catch (IOException ignore) {}
+                try { is.close(); } catch (IOException ignore) {}
 
+
+                Thread.sleep(1000);
                 throw new RuntimeException("Forked Grails VM exited with error");
             }
         } catch (FileNotFoundException e) {
@@ -180,8 +190,10 @@ public class ForkedGrailsRuntime {
     }
 
     protected static void fatalError(Throwable e) {
-        System.err.println("Fatal error forking Grails JVM: " + e.getMessage());
-        e.printStackTrace(System.err);
+        System.out.println();
+        System.out.println("Fatal error forking Grails JVM: " + e.getMessage());
+        e.printStackTrace(System.out);
+        System.out.flush();
         System.exit(1);
     }
 
