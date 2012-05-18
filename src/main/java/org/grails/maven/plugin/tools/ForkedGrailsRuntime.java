@@ -26,6 +26,7 @@ public class ForkedGrailsRuntime {
     private int minMemory = 512;
     private int maxPerm = 256;
     private boolean debug;
+    private File reloadingAgent;
 
     public ForkedGrailsRuntime(ExecutionContext executionContext) {
         this.executionContext = executionContext;
@@ -70,6 +71,9 @@ public class ForkedGrailsRuntime {
             List<String> cmd = new ArrayList<String>(Arrays.asList("java", "-Xmx" + maxMemory + "M", "-Xms" + minMemory + "M", "-XX:MaxPermSize=" + maxPerm + "m", "-Dgrails.build.execution.context=" + tempFile.getCanonicalPath(), "-cp", cp.toString()));
             if(debug) {
                 cmd.addAll(Arrays.asList("-Xdebug","-Xnoagent","-Dgrails.full.stacktrace=true", "-Djava.compiler=NONE", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005"));
+            }
+            if(reloadingAgent != null) {
+                cmd.addAll(Arrays.asList("-javaagent:" + reloadingAgent.getCanonicalPath(), "-noverify", "-Dspringloaded=profile=grails"));
             }
             cmd.add(getClass().getName());
             processBuilder
@@ -229,6 +233,11 @@ public class ForkedGrailsRuntime {
             throw new RuntimeException(ex);
         }
     }
+
+    public void setReloadingAgent(File file) {
+        this.reloadingAgent = file;
+    }
+
 
     public static class ExecutionContext implements Serializable {
         private List<File> compileDependencies;

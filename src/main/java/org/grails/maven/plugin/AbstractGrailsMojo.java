@@ -59,7 +59,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
+    public static final String SPRING_LOADED_VERSION = "1.0.6";
 
+    /**
+     * Whether to activate the reloading agent (forked mode only) for this command
+     */
+    protected boolean activateAgent;
     /**
      * The directory where is launched the mvn command.
      *
@@ -289,6 +294,14 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setBaseDir(project.getBasedir());
             ec.setEnv(getEnvironment());
             ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
+            if(activateAgent) {
+                List<File> springLoadedJar = resolveArtifacts(new ArrayList<Artifact>() {{
+                    add(artifactFactory.createArtifact("com.springsource.springloaded", "springloaded-core", SPRING_LOADED_VERSION, Artifact.SCOPE_COMPILE, "jar"));
+                }});
+                if(!springLoadedJar.isEmpty()) {
+                    fgr.setReloadingAgent(springLoadedJar.get(0));
+                }
+            }
             fgr.setDebug(forkDebug);
             try {
                 fgr.fork();
