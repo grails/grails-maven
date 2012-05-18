@@ -130,21 +130,21 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * Whether the JVM is forked for executing Grails commands
      *
-     * @parameter expression="${forkPermGen}" default-value="false"
+     * @parameter expression="${forkPermGen}" default-value="256"
      */
     protected int forkPermGen = 256;
 
     /**
      * Whether the JVM is forked for executing Grails commands
      *
-     * @parameter expression="${forkMaxMemory}" default-value="false"
+     * @parameter expression="${forkMaxMemory}" default-value="1024"
      */
     protected int forkMaxMemory = 1024;
 
     /**
      * Whether the JVM is forked for executing Grails commands
      *
-     * @parameter expression="${forkMinMemory}" default-value="false"
+     * @parameter expression="${forkMinMemory}" default-value="512"
      */
     protected int forkMinMemory = 512;    
 
