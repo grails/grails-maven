@@ -50,6 +50,8 @@ import java.util.*;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @author Peter Ledbrook
  * @author Jonathan Pearlin
+ * @author Graeme Rocher
+ *
  * @version $Id$
  */
 public abstract class AbstractGrailsMojo extends AbstractMojo {
