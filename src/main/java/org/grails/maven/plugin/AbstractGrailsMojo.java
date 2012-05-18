@@ -126,6 +126,28 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     protected boolean forkDebug = false;
 
+
+    /**
+     * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkPermGen}" default-value="false"
+     */
+    protected int forkPermGen = 256;
+
+    /**
+     * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkMaxMemory}" default-value="false"
+     */
+    protected int forkMaxMemory = 1024;
+
+    /**
+     * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkMinMemory}" default-value="false"
+     */
+    protected int forkMinMemory = 512;    
+
     /**
      * The directory where plugins are stored.
      *
@@ -305,6 +327,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 }
             }
             fgr.setDebug(forkDebug);
+            fgr.setMaxMemory(forkMaxMemory);
+            fgr.setMaxPerm(forkPermGen);
+            fgr.setMinMemory(forkMinMemory);
             try {
                 fgr.fork();
             } catch (Exception e) {
