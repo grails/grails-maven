@@ -17,20 +17,9 @@
 package org.grails.maven.plugin;
 
 import grails.util.Metadata;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import jline.Terminal;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -48,6 +37,12 @@ import org.grails.launcher.GrailsLauncher;
 import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.tools.ForkedGrailsRuntime;
 import org.grails.maven.plugin.tools.GrailsServices;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.URL;
+import java.util.*;
 
 /**
  * Common services for all Mojos using Grails
@@ -263,9 +258,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setBuildDependencies(resolveGrailsExecutionPathJars(true));
             List<File> providedDependencies = resolveArtifacts(getProvidedArtifacts(project));
             ec.setProvidedDependencies(providedDependencies);
-            ec.setCompileDependencies(resolveArtifacts(getCompileArtifacts(this.project)));
-            ec.setTestDependencies(resolveArtifacts(getTestArtifacts(project)));
-            ec.setRuntimeDependencies(resolveArtifacts(getRuntimeArtifacts(project)));
+            ec.setCompileDependencies(getCompileFiles());
+            ec.setTestDependencies(getTestFiles());
+            ec.setRuntimeDependencies(getRuntimeFiles());
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
             ec.setClassesDir(new File(targetDir, "classes"));
@@ -305,6 +300,45 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
+    private List<File> getCompileFiles() throws MojoExecutionException {
+        List compileClasspathElements = null;
+        try {
+            compileClasspathElements = project.getCompileClasspathElements();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        }
+        return getDependencyFiles(compileClasspathElements);
+    }
+
+
+
+    private List<File> getRuntimeFiles() throws MojoExecutionException {
+        List compileClasspathElements = null;
+        try {
+            compileClasspathElements = project.getRuntimeClasspathElements();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        }
+        return getDependencyFiles(compileClasspathElements);
+    }
+
+    private List<File> getTestFiles() throws MojoExecutionException {
+        List compileClasspathElements = null;
+        try {
+            compileClasspathElements = project.getTestClasspathElements();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        }
+        return getDependencyFiles(compileClasspathElements);
+    }
+
+    private List<File> getDependencyFiles(List compileClasspathElements) {
+        List<File> files = new ArrayList<File>();
+        for (Object compileClasspathElement : compileClasspathElements) {
+            files.add(new File(compileClasspathElement.toString()));
+        }
+        return files;
+    }
 
     /**
      * Resolves artifacts to files including transitive resolution
@@ -784,9 +818,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         final List<File> files = new ArrayList<File>(artifacts.size());
         for (Artifact artifact : artifacts) {
             File file = artifact.getFile();
-            String name = file.getName();
-            if(file != null && !name.contains("xml-apis") && !name.contains("commons-logging"))
-                files.add(file);
+            if(file != null) {
+                String name = file.getName();
+                if(!name.contains("xml-apis") && !name.contains("commons-logging"))
+                    files.add(file);
+            }
         }
 
         return files;
