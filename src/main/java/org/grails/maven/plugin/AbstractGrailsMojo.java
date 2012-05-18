@@ -320,29 +320,53 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
-        return getDependencyFiles(compileClasspathElements);
+        List<File> dependencyFiles = getDependencyFiles(compileClasspathElements);
+
+        Collection<Artifact> compileArtifacts = getCompileArtifacts(project);
+        List<File> files = artifactsToFiles(compileArtifacts);
+        dependencyFiles.addAll(zipFilesOnly(files));
+
+        return dependencyFiles;
     }
 
+    private Collection<? extends File> zipFilesOnly(List<File> files) {
+        List<File> newFiles = new ArrayList<File>();
+        for (File file : files) {
+            if(file != null && file.getName().endsWith(".zip")) {
+                newFiles.add(file);
+            }
+        }
+        return newFiles;
+    }
 
 
     private List<File> getRuntimeFiles() throws MojoExecutionException {
-        List compileClasspathElements = null;
+        List runtimeClasspathElements;
         try {
-            compileClasspathElements = project.getRuntimeClasspathElements();
+            runtimeClasspathElements = project.getRuntimeClasspathElements();
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
-        return getDependencyFiles(compileClasspathElements);
+        List<File> dependencyFiles = getDependencyFiles(runtimeClasspathElements);
+        Collection<Artifact> compileArtifacts = getRuntimeArtifacts(project);
+        List<File> files = artifactsToFiles(compileArtifacts);
+        dependencyFiles.addAll(zipFilesOnly(files));
+
+        return dependencyFiles;
     }
 
     private List<File> getTestFiles() throws MojoExecutionException {
-        List compileClasspathElements = null;
+        List testClasspathElements;
         try {
-            compileClasspathElements = project.getTestClasspathElements();
+            testClasspathElements = project.getTestClasspathElements();
         } catch (DependencyResolutionRequiredException e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
-        return getDependencyFiles(compileClasspathElements);
+        List<File> dependencyFiles = getDependencyFiles(testClasspathElements);
+        Collection<Artifact> testArtifacts = getTestArtifacts(project);
+        List<File> files = artifactsToFiles(testArtifacts);
+        dependencyFiles.addAll(zipFilesOnly(files));
+        return dependencyFiles;
     }
 
     private List<File> getDependencyFiles(List compileClasspathElements) {
