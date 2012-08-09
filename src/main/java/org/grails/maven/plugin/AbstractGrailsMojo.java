@@ -65,6 +65,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     /**
      * Whether to activate the reloading agent (forked mode only) for this command
+	 *
+	 * @parameter expression="${activateAgent}"
      */
     protected boolean activateAgent;
     /**
