@@ -75,6 +75,11 @@ public class ForkedGrailsRuntime {
             if(reloadingAgent != null) {
                 cmd.addAll(Arrays.asList("-javaagent:" + reloadingAgent.getCanonicalPath(), "-noverify", "-Dspringloaded=profile=grails"));
             }
+            if(null != executionContext.getForkedVmArgs()
+            && executionContext.getForkedVmArgs().size() > 0) {
+                cmd.addAll(executionContext.getForkedVmArgs());
+            }
+
             cmd.add(getClass().getName());
             processBuilder
                     .directory(executionContext.baseDir)
@@ -245,6 +250,7 @@ public class ForkedGrailsRuntime {
         private List<File> buildDependencies;
         private List<File> providedDependencies;
         private List<File> testDependencies;
+        private List forkedVmArgs;
         
         private File grailsWorkDir;
         private File projectWorkDir;
@@ -257,6 +263,7 @@ public class ForkedGrailsRuntime {
         private String scriptName;
         private String env;
         private String args;
+
 
         public String getScriptName() {
             return scriptName;
@@ -280,6 +287,14 @@ public class ForkedGrailsRuntime {
 
         public void setArgs(String args) {
             this.args = args;
+        }
+
+        public List<String> getForkedVmArgs() {
+            return forkedVmArgs;
+        }
+
+        public void setForkedVmArgs(List<String> forkedVmArgs) {
+            this.forkedVmArgs = forkedVmArgs;
         }
 
         public File getBaseDir() {
