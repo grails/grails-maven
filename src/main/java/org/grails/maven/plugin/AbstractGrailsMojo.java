@@ -65,6 +65,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     /**
      * Whether to activate the reloading agent (forked mode only) for this command
+	 *
+	 * @parameter expression="${activateAgent}"
      */
     protected boolean activateAgent;
     /**
@@ -120,12 +122,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected boolean fork = false;
 
     /**
+     * List of arguments passed to the forked VM
+     *
+     * @parameter
+     */
+    protected List forkedVmArgs;
+
+    /**
      * Whether the JVM is forked for executing Grails commands
      *
      * @parameter expression="${forkDebug}" default-value="false"
      */
     protected boolean forkDebug = false;
-
 
     /**
      * Whether the JVM is forked for executing Grails commands
@@ -296,7 +304,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setTestClassesDir(new File(targetDir, "test-classes"));
             ec.setResourcesDir(new File(targetDir, "resources"));
             ec.setProjectPluginsDir(this.pluginsDir);
-
+            ec.setForkedVmArgs(this.forkedVmArgs);
 
             // If the command is running in non-interactive mode, we
             // need to pass on the relevant argument.
