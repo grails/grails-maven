@@ -3,6 +3,7 @@ package org.grails.maven.plugin.tools;
 import groovy.lang.GroovyRuntimeException;
 import org.grails.launcher.GrailsLauncher;
 import org.grails.launcher.RootLoader;
+import org.grails.maven.plugin.AbstractGrailsMojo;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -75,11 +76,21 @@ public class ForkedGrailsRuntime {
             if(reloadingAgent != null) {
                 cmd.addAll(Arrays.asList("-javaagent:" + reloadingAgent.getCanonicalPath(), "-noverify", "-Dspringloaded=profile=grails"));
             }
+
             if(null != executionContext.getForkedVmArgs()
             && executionContext.getForkedVmArgs().size() > 0) {
                 cmd.addAll(executionContext.getForkedVmArgs());
             }
 
+            // For use inside of IDEs
+            if (executionContext.grailsBuildListener != null) {
+                cmd.add("-D" + AbstractGrailsMojo.GRAILS_BUILD_LISTENERS + "=" + executionContext.grailsBuildListener);
+            }
+            // For use inside of IDEs
+            if (executionContext.dependencyFileLocation != null) {
+                cmd.add("-D" + AbstractGrailsMojo.DEPENDENCY_FILE_LOC + "=" + executionContext.dependencyFileLocation);
+            }
+            
             cmd.add(getClass().getName());
             processBuilder
                     .directory(executionContext.baseDir)
@@ -259,10 +270,12 @@ public class ForkedGrailsRuntime {
         private File resourcesDir;
         private File projectPluginsDir;
         private File baseDir;
+        private File dependencyFileLocation;
         
         private String scriptName;
         private String env;
         private String args;
+        private String grailsBuildListener;
 
 
         public String getScriptName() {
@@ -391,6 +404,22 @@ public class ForkedGrailsRuntime {
 
         public void setProjectPluginsDir(File projectPluginsDir) {
             this.projectPluginsDir = projectPluginsDir;
+        }
+
+        public File getDependencyFileLocation() {
+            return dependencyFileLocation;
+        }
+
+        public void setDependencyFileLocation(File dependencyFile) {
+            this.dependencyFileLocation = dependencyFile;
+        }
+
+        public String getGrailsBuildListener() {
+            return grailsBuildListener;
+        }
+
+        public void setGrailsBuildListener(String buildListener) {
+            this.grailsBuildListener = buildListener;
         }
     }
 
