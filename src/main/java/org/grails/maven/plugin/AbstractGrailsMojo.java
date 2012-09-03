@@ -339,6 +339,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             fgr.setMaxPerm(forkPermGen);
             fgr.setMinMemory(forkMinMemory);
             try {
+                handleVersionSync();
                 fgr.fork();
             } catch (Exception e) {
                 throw new MojoExecutionException(e.getMessage(), e);
@@ -464,14 +465,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             final GrailsLauncher launcher = new GrailsLauncher(rootLoader, grailsHomePath, basedir.getAbsolutePath());
             launcher.setPlainOutput(true);
             configureBuildSettings(launcher);
+            handleVersionSync();
 
-            // Search for all Grails plugin dependencies and install
-            // any that haven't already been installed.
-            final Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
-            boolean metadataModified = syncVersions(metadata);
-
-            if (metadataModified)
-                metadata.persist();
 
             // If the command is running in non-interactive mode, we
             // need to pass on the relevant argument.
@@ -505,7 +500,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
+    private void handleVersionSync() {
+        // Search for all Grails plugin dependencies and install
+        // any that haven't already been installed.
+        final Metadata metadata = Metadata.getInstance(new File(getBasedir(), "application.properties"));
+        boolean metadataModified = syncVersions(metadata);
+
+        if (metadataModified)
+            metadata.persist();
+    }
+
     private boolean syncVersions(Metadata metadata) {
+
         boolean result = false;
 
         Object grailsVersion = metadata.get(APP_GRAILS_VERSION);
@@ -526,6 +532,22 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
 
         return result;
+    }
+
+    private boolean isGrailsPlugin(File basedir) {
+        try {
+            File[] files = basedir.listFiles();
+            if(files != null) {
+                for (File file : files) {
+                    if(file.getName().endsWith("GrailsPlugin.groovy")) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return false;
     }
 
     private Artifact findGrailsDependency(MavenProject project) {
