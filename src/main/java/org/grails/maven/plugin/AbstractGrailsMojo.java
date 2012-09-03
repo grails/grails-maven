@@ -56,8 +56,9 @@ import java.util.*;
  */
 public abstract class AbstractGrailsMojo extends AbstractMojo {
 
+    public static final String DEPENDENCY_FILE_LOC = "org.grails.ide.eclipse.core.launch.DependencyExtractingBuildListener.filename";
+    public static final String GRAILS_BUILD_LISTENERS = "grails.build.listeners";
     public static final String PLUGIN_PREFIX = "grails-";
-
     private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
@@ -223,7 +224,35 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @readonly
      */
     private List<?> remoteRepositories;
-
+    
+    /**
+     * Extra classpath entries as a comma separated list of file names.
+     * For entries with a comma in their name, use backslash to escape.
+     * 
+     * INTERNAL This parameter is not meant to be used externally.  It is used by IDEs
+     * that require extra classpath entries to execute grails commands.
+     * 
+     * @parameter
+     */
+    private String extraClasspathEntries;
+    
+    
+    /**
+     * Fully qualified classname of a grails build listener to attach 
+     * to the Grails command
+     * 
+     * @parameter
+     */
+    private String grailsBuildListener;
+    
+    /**
+     * Fully qualified path name of the project dependency file to create.
+     * 
+     * INTERNAL This parameter is not meant to be used externally. This parameter is used by 
+     * IDEs to generate project dependency information during builds.
+     */
+    private String dependencyFileLocation;
+    
     /**
      * @component
      */
@@ -235,6 +264,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     private GrailsServices grailsServices;
 
+    
     /**
      * Returns the configured base directory for this execution of the plugin.
      *
@@ -317,6 +347,14 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             if (this.showStacktrace) {
                 args = (args != null) ? "--stacktrace " + args : "--stacktrace ";
             }
+            
+            // these two settings are only used if running inside of an ide
+            if (this.grailsBuildListener != null) {
+                ec.setGrailsBuildListener(grailsBuildListener);
+            }
+            if (this.dependencyFileLocation != null) {
+                ec.setDependencyFileLocation(new File(dependencyFileLocation));
+            }
 
             // Enable the plain output for the Grails command to fix an issue with JLine
             // consuming the standard output after execution via Maven.
@@ -327,9 +365,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ec.setEnv(getEnvironment());
             ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
             if(activateAgent) {
-                List<File> springLoadedJar = resolveArtifacts(new ArrayList<Artifact>() {{
-                    add(artifactFactory.createArtifact("com.springsource.springloaded", "springloaded-core", SPRING_LOADED_VERSION, Artifact.SCOPE_COMPILE, "jar"));
-                }});
+                List<File> springLoadedJar = resolveArtifacts(Collections
+                        .singleton(artifactFactory.createArtifact(
+                                "com.springsource.springloaded",
+                                "springloaded-core", SPRING_LOADED_VERSION,
+                                Artifact.SCOPE_COMPILE, "jar")));
                 if(!springLoadedJar.isEmpty()) {
                     fgr.setReloadingAgent(springLoadedJar.get(0));
                 }
@@ -483,10 +523,31 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // Enable the plain output for the Grails command to fix an issue with JLine
             // consuming the standard output after execution via Maven.
             args = (args != null) ? "--plain-output " + args : "--plain-output";
+            
+            // set system properties specific for ides, but be nice and unset when done
+            String oldBuildListeners = System.getProperty(GRAILS_BUILD_LISTENERS);
+            if (this.grailsBuildListener != null) {
+                System.setProperty(GRAILS_BUILD_LISTENERS, this.grailsBuildListener);
+                getLog().info("Grails build listener: " + this.grailsBuildListener);
+            }
+            String oldDependenciesFile = System.getProperty(DEPENDENCY_FILE_LOC);
+            if (this.dependencyFileLocation != null) {
+                System.setProperty(DEPENDENCY_FILE_LOC, this.dependencyFileLocation);
+                getLog().info("Dependency file location: " + this.dependencyFileLocation);
+            }
+            try {
+                final int retval = launcher.launch(targetName, args, getEnvironment());
+                if (retval != 0) {
+                    throw new MojoExecutionException("Grails returned non-zero value: " + retval);
+                }
 
-            final int retval = launcher.launch(targetName, args, getEnvironment());
-            if (retval != 0) {
-                throw new MojoExecutionException("Grails returned non-zero value: " + retval);
+            } finally {
+                if (oldBuildListeners != null) {
+                    System.setProperty(GRAILS_BUILD_LISTENERS, oldBuildListeners);
+                }
+                if (oldDependenciesFile != null) {
+                    System.setProperty(DEPENDENCY_FILE_LOC, oldDependenciesFile);
+                }
             }
         } catch (final MojoExecutionException ex) {
             // Simply rethrow it.
@@ -734,6 +795,25 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                     jars.add(toolsJar);
                 }
             }
+            
+            if (extraClasspathEntries != null) {
+                String[] entriesArr = extraClasspathEntries.split(",");
+                for (int i = 0; i < entriesArr.length; i++) {
+                    // check for comma
+                    String entry;
+                    if (entriesArr[i].endsWith("\\") && i < entriesArr.length-1) {
+                        entry = entriesArr[i] + "," + entriesArr[++i];
+                    } else {
+                        entry = entriesArr[i];
+                    }
+                    File file = new File(entry);
+                    if (!file.exists()) {
+                        this.getLog().warn("Grails extra classpath entry " + file + " does not exist.", new Exception());
+                    }
+                    jars.add(file);
+                }
+            }
+            
             return new ArrayList<File>(jars);
         } catch (final Exception e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
