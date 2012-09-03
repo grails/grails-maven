@@ -49,7 +49,7 @@
 
         <!-- Dependencies -->
         <groovy.version>1.8.6</groovy.version>
-        <grails.version>2.1.0</grails.version>
+        <grails.version>2.1.1.BUILD-SNAPSHOT</grails.version>
         <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
         <grails-core.version>${grails.version}</grails-core.version>
         <grails-scripts.version>${grails.version}</grails-scripts.version>
