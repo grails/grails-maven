@@ -56,7 +56,7 @@ import java.util.*;
  */
 public abstract class AbstractGrailsMojo extends AbstractMojo {
 
-    public static final String DEPENDENCY_FILE_LOC = "org.grails.ide.eclipse.core.launch.DependencyExtractingBuildListener.filename";
+    public static final String DEPENDENCY_FILE_LOC = "org.grails.ide.eclipse.dependencies.filename";
     public static final String GRAILS_BUILD_LISTENERS = "grails.build.listeners";
     public static final String PLUGIN_PREFIX = "grails-";
     private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
