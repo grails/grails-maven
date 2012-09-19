@@ -19,11 +19,11 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * Runs a Grails applications unit tests and integration tests.
+ * Runs a Grails applications unit tests.
  *
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
- * @description Runs a Grails applications unit tests and integration tests.
+ * @description Runs a Grails applications unit tests.
  * @goal maven-test
  * @phase test
  * @requiresProject true
@@ -33,14 +33,14 @@ import org.apache.maven.plugin.MojoFailureException;
 public class MvnTestMojo extends AbstractGrailsMojo {
 
     /**
-     * Set this to 'true' to bypass unit/integration tests entirely. Its use is
+     * Set this to 'true' to bypass unit tests entirely. Its use is
       * @parameter default-value="false" expression="${skipTests}"
       * @since 0.4
       */
      private boolean skipTests;
 
      /**
-      * Set this to 'true' to bypass unit/integration tests entirely. Its use is
+      * Set this to 'true' to bypass unit tests entirely. Its use is
       * NOT RECOMMENDED, but quite convenient on occasion.
       *
      * @parameter expression="${grails.test.skip}"
@@ -49,7 +49,7 @@ public class MvnTestMojo extends AbstractGrailsMojo {
     private boolean skip;
 
     /**
-     * Set this to 'true' to bypass unit/integration tests entirely. Its use is
+     * Set this to 'true' to bypass unit tests entirely. Its use is
      * NOT RECOMMENDED, but quite convenient on occasion.
      *
      * @parameter expression="${maven.test.skip}"
