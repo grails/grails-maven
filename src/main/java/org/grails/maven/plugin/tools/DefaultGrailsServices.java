@@ -35,7 +35,6 @@ import org.codehaus.groovy.grails.plugins.GrailsPluginInfo;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.springframework.core.io.FileSystemResource;
 
 /**
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
@@ -225,7 +224,7 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
 
         final GroovyClassLoader classLoader = new GroovyClassLoader();
         final AstPluginDescriptorReader reader = new AstPluginDescriptorReader(classLoader);
-        final GrailsPluginInfo info = reader.readPluginInfo(new FileSystemResource(descriptor));
+        final GrailsPluginInfo info = reader.readPluginInfo(new org.codehaus.groovy.grails.io.support.FileSystemResource(descriptor));
         final String version = info.getVersion();
 
         if (version == null || version.trim().length() == 0) {
