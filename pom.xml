@@ -638,6 +638,7 @@
             <activation>
                 <os>
                     <family>unix</family>
+                    <name>!mac os x</name> <!-- needed due to MNG-4983 -->
                 </os>
             </activation>
             <dependencies>
