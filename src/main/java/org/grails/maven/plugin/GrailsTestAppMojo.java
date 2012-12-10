@@ -31,10 +31,35 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class GrailsTestAppMojo extends AbstractGrailsMojo {
 
+    /**
+     *  The space-separated list of test classes to run (e.g. *Controller)
+     *
+     * @parameter expression="${testPatterns}"
+     */
+    private String testPatterns;
+    /**
+     * The space-separated list of test types or phases (e.g unit: :spock)
+     *
+     * @parameter expression="${testTypesAndPhases}"
+     */
+    private String testTypesAndPhases;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         if(getEnvironment() == null) {
             env = "test";
         }
         runGrails("TestApp");
+
+        String args = null;
+
+        if (testTypesAndPhases != null) {
+            args = testTypesAndPhases;
+        }
+
+        if (testPatterns != null) {
+            args = (args != null) ? args + " " + testPatterns : testPatterns;
+        }
+
+        runGrails("TestApp", args);
     }
 }
