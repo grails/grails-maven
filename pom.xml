@@ -48,7 +48,7 @@
         <maven.version>2.0.5</maven.version>
 
         <!-- Dependencies -->
-        <groovy.version>2.0.5</groovy.version>
+        <groovy.version>2.0.6</groovy.version>
         <grails.version>2.2.0</grails.version>
         <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
         <grails-core.version>${grails.version}</grails-core.version>
@@ -93,6 +93,12 @@
             <artifactId>jline</artifactId>
             <version>1.0</version>
         </dependency>
+        
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>        
                 
         <dependency>
              <groupId>org.codehaus.groovy</groupId>
@@ -638,7 +644,7 @@
             <activation>
                 <os>
                     <family>unix</family>
-		    <name>!mac os x</name> <!-- needed due to MNG-4983 -->
+                    <name>!mac os x</name> <!-- needed due to MNG-4983 -->
                 </os>
             </activation>
             <dependencies>
