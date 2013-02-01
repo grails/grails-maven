@@ -27,7 +27,7 @@ import grails.util.GrailsNameUtils;
  * @description Executes an arbitrary Grails command.
  * @goal exec
  * @requiresProject false
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @since 0.4
  */
 public class GrailsExecMojo extends AbstractGrailsMojo {
