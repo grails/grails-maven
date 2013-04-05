@@ -62,7 +62,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
-    public static final String SPRING_LOADED_VERSION = "1.0.6";
+    public static final String SPRING_LOADED_VERSION = "1.1.1";
 
     /**
      * Whether to activate the reloading agent (forked mode only) for this command
@@ -367,11 +367,14 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             if(activateAgent) {
                 List<File> springLoadedJar = resolveArtifacts(Collections
                         .singleton(artifactFactory.createArtifact(
-                                "com.springsource.springloaded",
+                                "org.springsource.springloaded",
                                 "springloaded-core", SPRING_LOADED_VERSION,
                                 Artifact.SCOPE_COMPILE, "jar")));
                 if(!springLoadedJar.isEmpty()) {
                     fgr.setReloadingAgent(springLoadedJar.get(0));
+                }else{
+                    getLog().warn("Grails Start with Reloading: org.springsource.springloaded:springloaded-core"+SPRING_LOADED_VERSION+" not found");
+                    getLog().error("Grails Start with Reloading: not enabled");
                 }
             }
             fgr.setDebug(forkDebug);
@@ -385,6 +388,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 throw new MojoExecutionException(e.getMessage(), e);
             }
         } else {
+            getLog().warn("Grails Start with out fork");
             runGrailsInline(targetName, args);
         }
     }
