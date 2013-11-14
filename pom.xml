@@ -48,7 +48,7 @@
         <maven.version>2.0.5</maven.version>
 
         <!-- Dependencies -->
-        <groovy.version>2.1.8</groovy.version>
+        <groovy.version>2.1.9</groovy.version>
         <grails.version>2.3.2</grails.version>
         <grails-bootstrap.version>${grails.version}</grails-bootstrap.version>
         <grails-core.version>${grails.version}</grails-core.version>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
-            <version>1.0</version>
+            <version>2.11</version>
         </dependency>
         
         <dependency>
