@@ -20,7 +20,7 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Runs a Grails application's functional tests.
- *
+ * 
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Runs a Grails application's functional tests.
@@ -32,56 +32,65 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class MvnFunctionalTestMojo extends AbstractGrailsMojo {
 
-    /**
-     * Set this to 'true' to bypass functional tests entirely. Its use is
-     * NOT RECOMMENDED, but quite convenient on occasion.
-      * @parameter default-value="false" expression="${skipTests}"
-      * @since 0.4
-      */
-     private boolean skipTests;
+	/**
+	 * Set this to 'true' to bypass functional tests entirely. Its use is NOT RECOMMENDED, but quite convenient on
+	 * occasion.
+	 * 
+	 * @parameter default-value="false" expression="${skipTests}"
+	 * @since 0.4
+	 */
+	private boolean skipTests;
 
-     /**
-      * Set this to 'true' to bypass functional tests entirely. Its use is
-      * NOT RECOMMENDED, but quite convenient on occasion.
-      *
-     * @parameter expression="${grails.test.skip}"
-     * @since 0.3
-     */
-    private boolean skip;
+	/**
+	 * Set this to 'true' to bypass functional tests entirely. Its use is NOT RECOMMENDED, but quite convenient on
+	 * occasion.
+	 * 
+	 * @parameter expression="${grails.test.skip}"
+	 * @since 0.3
+	 */
+	private boolean skip;
 
-    /**
-     * Set this to 'true' to bypass functional tests entirely. Its use is
-     * NOT RECOMMENDED, but quite convenient on occasion.
-     *
-     * @parameter expression="${maven.test.skip}"
-     * @since 0.3
-     */
-    private Boolean mavenSkip;
+	/**
+	 * Set this to 'true' to bypass functional tests entirely. Its use is NOT RECOMMENDED, but quite convenient on
+	 * occasion.
+	 * 
+	 * @parameter expression="${grails.functionalTest.skip}"
+	 */
+	private boolean skipFunction;
 
-    /**
-     * Set this to "true" to ignore a failure during testing. Its use is NOT RECOMMENDED, but quite convenient on
-     * occasion.
-     *
-     * @parameter default-value="false" expression="${maven.test.failure.ignore}"
-     */
-    private boolean testFailureIgnore;
+	/**
+	 * Set this to 'true' to bypass functional tests entirely. Its use is NOT RECOMMENDED, but quite convenient on
+	 * occasion.
+	 * 
+	 * @parameter expression="${maven.test.skip}"
+	 * @since 0.3
+	 */
+	private Boolean mavenSkip;
 
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        if (skipTests || skip || (mavenSkip != null && mavenSkip.booleanValue())) {
-            getLog().info("Functional tests are skipped.");
-            return;
-        }
+	/**
+	 * Set this to "true" to ignore a failure during testing. Its use is NOT RECOMMENDED, but quite convenient on
+	 * occasion.
+	 * 
+	 * @parameter default-value="false" expression="${maven.test.failure.ignore}"
+	 */
+	private boolean testFailureIgnore;
 
-        try {
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		if (skipTests || skip || skipFunction || (mavenSkip != null && mavenSkip.booleanValue())) {
+			getLog().info("Functional tests are skipped.");
+			return;
+		}
 
-            if(getEnvironment() == null) {
-                env = "test";
-            }
-            runGrails("TestApp", "--unit --integration --functional");
-        } catch (MojoExecutionException me) {
-            if (!testFailureIgnore) {
-                throw me;
-            }
-        }
-    }
+		try {
+
+			if (getEnvironment() == null) {
+				env = "test";
+			}
+			runGrails("TestApp", "--unit --integration --functional");
+		} catch (MojoExecutionException me) {
+			if (!testFailureIgnore) {
+				throw me;
+			}
+		}
+	}
 }
