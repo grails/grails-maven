@@ -17,7 +17,7 @@
 package org.grails.maven.plugin;
 
 import grails.util.Metadata;
-import jline.Terminal;
+import jline.TerminalFactory;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.artifact.factory.ArtifactFactory;
@@ -567,7 +567,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } catch (final Exception ex) {
             throw new MojoExecutionException("Unable to start Grails", ex);
         } finally {
-            Terminal.resetTerminal();
+            TerminalFactory.reset();
             System.setIn(currentIn);
             System.setOut(currentOutput);
         }
