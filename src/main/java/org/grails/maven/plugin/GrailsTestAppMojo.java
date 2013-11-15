@@ -48,7 +48,6 @@ public class GrailsTestAppMojo extends AbstractGrailsMojo {
         if(getEnvironment() == null) {
             env = "test";
         }
-        runGrails("TestApp");
 
         String args = null;
 
