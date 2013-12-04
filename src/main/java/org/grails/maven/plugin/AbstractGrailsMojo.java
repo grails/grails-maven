@@ -324,17 +324,23 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
             ec.setBuildDependencies(resolveGrailsExecutionPathJars(true));
             List<File> providedDependencies = resolveArtifacts(getProvidedArtifacts(project));            
-            List<File> compileDependencies = getCompileFiles();            
-            Set<File> testDependencies = new HashSet<File>();
+            List<File> compileDependencies = resolveArtifacts(getCompileArtifacts(project));
+
+            Set<File> runtimeDependencies = new HashSet<File>( resolveArtifacts(getRuntimeArtifacts(project)) );
+            runtimeDependencies.addAll( compileDependencies );
+
+            Set<File> testDependencies = new HashSet<File>( resolveArtifacts(getTestArtifacts(project)) );
+
 
             testDependencies.addAll( providedDependencies );
             testDependencies.addAll( compileDependencies );
-            testDependencies.addAll( getTestFiles() );
+            testDependencies.addAll( runtimeDependencies );
+            testDependencies.addAll( testDependencies );
 
             ec.setProvidedDependencies(providedDependencies);
-            ec.setCompileDependencies(compileDependencies);            
+            ec.setCompileDependencies(compileDependencies);
             ec.setTestDependencies( new ArrayList<File>(testDependencies) );
-            ec.setRuntimeDependencies(getRuntimeFiles());
+            ec.setRuntimeDependencies( new ArrayList<File>(runtimeDependencies) );
 
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
