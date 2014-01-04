@@ -336,12 +336,23 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             testDependencies.addAll( compileDependencies );
             testDependencies.addAll( runtimeDependencies );
             testDependencies.addAll( testDependencies );
+            try {
+            	testDependencies.addAll( getDependencyFiles( project.getTestClasspathElements() ) );
+            } catch (DependencyResolutionRequiredException e) {
+                throw new MojoExecutionException("Failed to create test classpath for Grails execution.", e);
+            }
+            
 
             ec.setProvidedDependencies(providedDependencies);
             ec.setCompileDependencies(compileDependencies);
             ec.setTestDependencies( new ArrayList<File>(testDependencies) );
             ec.setRuntimeDependencies( new ArrayList<File>(runtimeDependencies) );
-
+            try {
+            	testDependencies.addAll( getDependencyFiles( project.getRuntimeClasspathElements() ) );
+            } catch (DependencyResolutionRequiredException e) {
+                throw new MojoExecutionException("Failed to create runtime classpath for Grails execution.", e);
+            }
+            
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
             ec.setClassesDir(new File(targetDir, "classes"));
