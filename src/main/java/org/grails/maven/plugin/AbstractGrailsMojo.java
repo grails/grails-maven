@@ -328,10 +328,13 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
             Set<File> runtimeDependencies = new HashSet<File>( resolveArtifacts(getRuntimeArtifacts(project)) );
             runtimeDependencies.addAll( compileDependencies );
-
+            try {
+            	runtimeDependencies.addAll( getDependencyFiles( project.getRuntimeClasspathElements() ) );
+            } catch (DependencyResolutionRequiredException e) {
+                throw new MojoExecutionException("Failed to create runtime classpath for Grails execution.", e);
+            }
+            
             Set<File> testDependencies = new HashSet<File>( resolveArtifacts(getTestArtifacts(project)) );
-
-
             testDependencies.addAll( providedDependencies );
             testDependencies.addAll( compileDependencies );
             testDependencies.addAll( runtimeDependencies );
@@ -341,18 +344,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             } catch (DependencyResolutionRequiredException e) {
                 throw new MojoExecutionException("Failed to create test classpath for Grails execution.", e);
             }
-            
 
             ec.setProvidedDependencies(providedDependencies);
             ec.setCompileDependencies(compileDependencies);
             ec.setTestDependencies( new ArrayList<File>(testDependencies) );
             ec.setRuntimeDependencies( new ArrayList<File>(runtimeDependencies) );
-            try {
-            	testDependencies.addAll( getDependencyFiles( project.getRuntimeClasspathElements() ) );
-            } catch (DependencyResolutionRequiredException e) {
-                throw new MojoExecutionException("Failed to create runtime classpath for Grails execution.", e);
-            }
-            
             ec.setGrailsWorkDir(new File(grailsWorkDir));
             ec.setProjectWorkDir(new File(targetDir));
             ec.setClassesDir(new File(targetDir, "classes"));
