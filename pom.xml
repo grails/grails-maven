@@ -62,10 +62,8 @@
         <maven-archiver.version>2.2</maven-archiver.version>
         <plexus-utils.version>1.4.5</plexus-utils.version>
         <junit.version>4.11</junit.version>
-        <maven-plugin-testing-harness.version>1.1</maven-plugin-testing-harness.version>
+        <maven-plugin-testing-harness.version>3.1.0</maven-plugin-testing-harness.version>
         <xmlunit.version>1.0</xmlunit.version>
-        <aspectjweaver.version>1.8.0</aspectjweaver.version>
-        <aspectjrt.version>1.8.0</aspectjrt.version>
 
         <!-- Reporting plugins -->
         <maven-project-info-reports-plugin.version>2.0.1</maven-project-info-reports-plugin.version>
@@ -74,7 +72,7 @@
         <maven-javadoc-plugin.version>2.4</maven-javadoc-plugin.version>
         <maven-jxr-plugin.version>2.1</maven-jxr-plugin.version>
         <maven-changelog-plugin.version>2.1</maven-changelog-plugin.version>
-        <maven-surefire-report-plugin.version>2.4.3</maven-surefire-report-plugin.version>
+        <maven-surefire-report-plugin.version>2.17</maven-surefire-report-plugin.version>
         <maven-checkstyle-plugin.version>2.1</maven-checkstyle-plugin.version>
         <maven-pmd-plugin.version>2.2</maven-pmd-plugin.version>
         <findbugs-maven-plugin.version>1.1.1</findbugs-maven-plugin.version>
@@ -278,6 +276,13 @@
 
         <dependency>
             <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${maven.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
             <artifactId>maven-project</artifactId>
             <version>${maven-project.version}</version>
         </dependency>
@@ -308,9 +313,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.maven.shared</groupId>
+            <groupId>org.apache.maven.plugin-testing</groupId>
             <artifactId>maven-plugin-testing-harness</artifactId>
-            <version>${maven-plugin-testing-harness.version}</version>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-compat</artifactId>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
 
