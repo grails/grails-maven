@@ -45,7 +45,7 @@
     
     <properties>
         <!-- Prerequisites -->
-        <maven.version>2.0.5</maven.version>
+        <maven.version>3.0</maven.version>
 
         <!-- Dependencies -->
         <groovy.version>2.1.9</groovy.version>
@@ -56,9 +56,9 @@
         <grails-maven-archetype.version>${grails.version}</grails-maven-archetype.version>
         <grails-launcher.version>1.0.5</grails-launcher.version>
 
-        <maven-model.version>2.0.7</maven-model.version>
+        <maven-model.version>3.0</maven-model.version>
         <maven-project.version>2.0.7</maven-project.version>
-        <maven-plugin-api.version>2.0.7</maven-plugin-api.version>
+        <maven-plugin-api.version>3.0</maven-plugin-api.version>
         <maven-archiver.version>2.2</maven-archiver.version>
         <plexus-utils.version>1.4.5</plexus-utils.version>
         <junit.version>4.11</junit.version>
@@ -250,6 +250,12 @@
 
         <dependency>
             <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>${maven.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.maven</groupId>
             <artifactId>maven-archiver</artifactId>
             <version>${maven-archiver.version}</version>
         </dependency>
@@ -265,6 +271,17 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-api</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.aether</groupId>
+            <artifactId>aether-util</artifactId>
+            <version>1.8</version>
         </dependency>
 
         <dependency>
