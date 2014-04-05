@@ -630,7 +630,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         Set dependencyArtifacts = project.getDependencyArtifacts();
         for (Object o : dependencyArtifacts) {
             Artifact artifact = (Artifact) o;
-            if (artifact.getArtifactId().equals("grails-dependencies")) {
+            if (artifact.getArtifactId().equals("grails-dependencies") &&
+                artifact.getGroupId().equals("org.grails")) {
                 return artifact;
             }
         }
