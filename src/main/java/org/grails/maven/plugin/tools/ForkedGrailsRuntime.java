@@ -1,6 +1,8 @@
 package org.grails.maven.plugin.tools;
 
 import groovy.lang.GroovyRuntimeException;
+import org.codehaus.groovy.grails.io.support.GrailsIOUtils;
+import org.codehaus.groovy.grails.io.support.MultiplexingOutputStream;
 import org.grails.launcher.GrailsLauncher;
 import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.AbstractGrailsMojo;
@@ -52,8 +54,9 @@ public class ForkedGrailsRuntime {
     public void fork() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         StringBuilder cp = new StringBuilder();
+        cp.append(GrailsIOUtils.findJarFile(ForkedGrailsRuntime.class)).append(File.pathSeparatorChar);
         for (File file : executionContext.getBuildDependencies()) {
-            cp.append(file).append(File.pathSeparator);
+            cp.append(file).append(File.pathSeparatorChar);
         }
 
 
@@ -113,6 +116,8 @@ public class ForkedGrailsRuntime {
                 try { es.close(); } catch (IOException ignore) {}
                 try { is.close(); } catch (IOException ignore) {}
 
+                System.out.flush();
+                System.err.flush();
 
                 throw new RuntimeException("Forked Grails VM exited with error");
             }
@@ -204,7 +209,11 @@ public class ForkedGrailsRuntime {
                 rootLoader.addURL(loggingBootstrapJar.toURI().toURL());
             }
             Class cls = rootLoader.loadClass("org.springframework.util.Log4jConfigurer");
-            invokeStaticMethod(cls, "initLogging", new Object[]{"classpath:grails-maven/log4j.properties"});
+            try {
+                invokeStaticMethod(cls, "initLogging", new Object[]{"classpath:grails-maven/log4j.properties"});
+            } catch (Throwable e) {
+                // ignore
+            }
         }
     }
 

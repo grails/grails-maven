@@ -31,46 +31,6 @@ public interface GrailsServices {
      */
     void setBasedir(File basedir);
 
-    /**
-     * Create a pom from a grails project.
-     *
-     * @param newProjectGroupId
-     *                The groupId to identify the project
-     * @param grailsProjectDescriptor
-     *                The Grails project descriptor
-     * @param mtgGroupId
-     *                The groupId of the plugin
-     * @param mtgArtifactId
-     *                The artifactId of the plugin
-     * @param grailsVersion
-     *                The grails version used by the application
-     * @return a maven's POM
-     * @since 0.1
-     */
-    MavenProject createPOM(String newProjectGroupId, GrailsProject grailsProjectDescriptor,
-                           String mtgGroupId, String mtgArtifactId, String grailsVersion);
-
-    /**
-     * Create a pom from a grails project.
-     *
-     * @param newProjectGroupId
-     *                The groupId to identify the project
-     * @param grailsProjectDescriptor
-     *                The Grails project descriptor
-     * @param mtgGroupId
-     *                The groupId of the plugin
-     * @param mtgArtifactId
-     *                The artifactId of the plugin
-     * @param grailsVersion
-     *                The grails version used by the application
-     * @param addEclipseSettings
-     *                Activate or not the generation of the entry to configure
-     *                the eclipse plugin
-     * @return a maven's POM
-     * @since 0.3
-     */
-    MavenProject createPOM(String newProjectGroupId, GrailsProject grailsProjectDescriptor, String mtgGroupId,
-                           String mtgArtifactId, String grailsVersion, boolean addEclipseSettings);
 
     /**
      * Read a grails project descriptor (application.properties) from a file.
