@@ -63,6 +63,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
     public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
+    public static final List<String> COMPILE_PLUS_RUNTIME_SCOPE = Arrays.asList("compile", "runtime");
 
     /**
      * Whether to activate the reloading agent (forked mode only) for this command
@@ -204,27 +205,27 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     /**
      * Extra classpath entries as a comma separated list of file names.
      * For entries with a comma in their name, use backslash to escape.
-     * 
+     *
      * INTERNAL This parameter is not meant to be used externally.  It is used by IDEs
      * that require extra classpath entries to execute grails commands.
-     * 
+     *
      * @parameter
      */
     private String extraClasspathEntries;
-    
-    
+
+
     /**
-     * Fully qualified classname of a grails build listener to attach 
+     * Fully qualified classname of a grails build listener to attach
      * to the Grails command
-     * 
+     *
      * @parameter
      */
     private String grailsBuildListener;
-    
+
     /**
      * Fully qualified path name of the project dependency file to create.
-     * 
-     * INTERNAL This parameter is not meant to be used externally. This parameter is used by 
+     *
+     * INTERNAL This parameter is not meant to be used externally. This parameter is used by
      * IDEs to generate project dependency information during builds.
      */
     private String dependencyFileLocation;
@@ -336,7 +337,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         List<File> providedDependencies = resolveArtifacts("provided");
         List<File> compileDependencies = resolveArtifacts("compile");
 
-        List<File> runtimeDependencies = resolveArtifacts("compile+runtime");
+        List<File> runtimeDependencies = resolveArtifacts(COMPILE_PLUS_RUNTIME_SCOPE);
 
         Set<File> testDependencies = new HashSet<File>( resolveArtifacts("test") );
         testDependencies.addAll( providedDependencies );
@@ -446,23 +447,28 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return resolveArtifacts( "compile");
     }
 
+    protected List<File> resolveArtifacts(Collection<String> scopes) throws MojoExecutionException {
+        MavenProject mavenProject = project;
+        return resolveArtifacts(mavenProject, scopes);
+    }
+
     protected List<File> resolveArtifacts(String scope) throws MojoExecutionException {
         MavenProject mavenProject = project;
-        return resolveArtifacts(mavenProject, scope);
+        return resolveArtifacts(mavenProject, Arrays.asList(scope));
     }
 
-    protected List<File> resolveArtifacts(MavenProject mavenProject, String scope) throws MojoExecutionException {
-        return resolveArtifacts(mavenProject, scope, null);
+    protected List<File> resolveArtifacts(MavenProject mavenProject, Collection<String> scopes) throws MojoExecutionException {
+        return resolveArtifacts(mavenProject, scopes, null);
     }
 
-    protected List<File> resolveArtifacts(MavenProject mavenProject, String scope, DependencyFilter filter) throws MojoExecutionException {
+    protected List<File> resolveArtifacts(MavenProject mavenProject, Collection<String> scopes, DependencyFilter filter) throws MojoExecutionException {
         try {
             DefaultDependencyResolutionRequest request = new DefaultDependencyResolutionRequest(mavenProject, repoSession);
             if(filter != null) {
-                request.setResolutionFilter(new OrDependencyFilter(new ScopeDependencyFilter(scope), filter));
+                request.setResolutionFilter(new OrDependencyFilter(new ScopeDependencyFilter(scopes, Collections.<String>emptyList()), filter));
             }
             else {
-                request.setResolutionFilter(new ScopeDependencyFilter(scope));
+                request.setResolutionFilter(new ScopeDependencyFilter(scopes, Collections.<String>emptyList()));
             }
             DependencyResolutionResult result = projectDependenciesResolver.resolve(request);
             List<org.eclipse.aether.graph.Dependency> dependencies = result.getDependencies();
@@ -635,12 +641,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
             Set<File> jars = new HashSet<File>();
             if(pluginOnly) {
-                jars.addAll(resolveArtifacts(pluginProject, "compile+runtime"));
+                jars.addAll(resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE));
 
             }
             else {
-                jars.addAll( resolveArtifacts(pluginProject, "compile+runtime") );
-                jars.addAll( resolveArtifacts(project, "compile+runtime") );
+                jars.addAll( resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE) );
+                jars.addAll( resolveArtifacts(project, COMPILE_PLUS_RUNTIME_SCOPE) );
             }
 
 
@@ -727,94 +733,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         return projectBuilder.build(pluginArtifact, request).getProject();
     }
 
-
-    /**
-     * Configures the launcher for execution.
-     *
-     * @param launcher The {@code GrailsLauncher} instance to be configured.
-     */
-    @SuppressWarnings("unchecked")
-    private void configureBuildSettings(final GrailsLauncher launcher) throws ProjectBuildingException, MojoExecutionException {
-        final String targetDir = this.project.getBuild().getDirectory();
-        launcher.setDependenciesExternallyConfigured(true);
-        launcher.setProvidedDependencies(artifactsToFiles(getProvidedArtifacts(project)));
-        launcher.setCompileDependencies(artifactsToFiles(getCompileArtifacts(this.project)));
-        launcher.setTestDependencies(artifactsToFiles(getTestArtifacts(project)));
-        launcher.setRuntimeDependencies(artifactsToFiles(getRuntimeArtifacts(project)));
-        launcher.setGrailsWorkDir(new File(grailsWorkDir));
-        launcher.setProjectWorkDir(new File(targetDir));
-        launcher.setClassesDir(new File(targetDir, "classes"));
-        launcher.setTestClassesDir(new File(targetDir, "test-classes"));
-        launcher.setResourcesDir(new File(targetDir, "resources"));
-        launcher.setProjectPluginsDir(this.pluginsDir);
-
-        final MavenProject pluginProject = getPluginProject();
-        List<File> files = resolveArtifacts(pluginProject,"compile+runtime", new PatternInclusionsDependencyFilter("org.grails.*"));
-        launcher.setBuildDependencies(files);
-    }
-
-    private Collection<Artifact> getRuntimeArtifacts(MavenProject project) {
-        List runtimeArtifacts = project.getRuntimeArtifacts();
-        List<Artifact> artifacts = new ArrayList<Artifact>(runtimeArtifacts);
-
-        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "runtime");
-        return artifacts;
-    }
-
-    private Collection<Artifact> getTestArtifacts(MavenProject project) {
-        List testArtifacts = project.getTestArtifacts();
-        List<Artifact> artifacts = new ArrayList<Artifact>(testArtifacts);
-
-        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "test");
-        return artifacts;
-    }
-
-    private Collection<Artifact> getCompileArtifacts(MavenProject project) {
-        List compileArtifacts = project.getCompileArtifacts();
-        List<Artifact> artifacts = new ArrayList<Artifact>(compileArtifacts);
-
-        copyScopedDependenciesToTarget(project.getDependencyArtifacts(), artifacts, "compile");
-        return artifacts;
-    }
-
-    private Collection<Artifact> getProvidedArtifacts(MavenProject project) {
-        Set dependencyArtifacts = project.getDependencyArtifacts();
-        List<Artifact> provided = new ArrayList<Artifact>();
-
-        copyScopedDependenciesToTarget(dependencyArtifacts, provided, "provided");
-        return provided;
-    }
-
-    private void copyScopedDependenciesToTarget(Set dependencyArtifacts, List<Artifact> targetArtifacts, String scope) {
-        for (Object dependencyArtifact : dependencyArtifacts) {
-            Artifact artifact = (Artifact) dependencyArtifact;
-
-            if (artifact.getScope().equals(scope)) {
-                targetArtifacts.add(artifact);
-            }
-        }
-    }
-
-    /**
-     * Converts a collection of Maven artifacts to files.  For this method to function properly,
-     * the artifacts MUST be resolved first.
-     *
-     * @param artifacts A collection of artifacts.
-     * @return The list of files pointed to by the artifacts.
-     */
-    private List<File> artifactsToFiles(final Collection<Artifact> artifacts) {
-        final List<File> files = new ArrayList<File>(artifacts.size());
-        for (Artifact artifact : artifacts) {
-            File file = artifact.getFile();
-            if(file != null) {
-                String name = file.getName();
-                if(!name.contains("xml-apis") && !name.contains("commons-logging"))
-                    files.add(file);
-            }
-        }
-
-        return files;
-    }
 
     /**
      * Finds the requested artifact in the supplied artifact collection.
