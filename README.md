@@ -26,4 +26,4 @@ As well as hooks into the normal Maven lifecyle like `compile`, `package` and `t
 
 You can create an example POM with any Grails application by doing:
 
-   $ grails create-pom [GROUP ID]
+    $ grails create-pom [GROUP ID]
