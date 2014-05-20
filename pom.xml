@@ -51,6 +51,7 @@
         <groovy.version>2.3.1</groovy.version>
         <grails.version>2.4.0</grails.version>
         <grails-launcher.version>1.0.5</grails-launcher.version>
+        <aether.version>0.9.1.v20140329</aether.version>
         <maven-model.version>${maven.version}</maven-model.version>
         <maven-plugin-api.version>${maven.version}</maven-plugin-api.version>
         <maven-project.version>2.2.1</maven-project.version>
@@ -98,14 +99,14 @@
             <!-- required in all cases -->
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-api</artifactId>
-            <version>0.9.1.v20140329</version>
+            <version>${aether.version}</version>
         </dependency>
 
         <dependency>
             <!-- optional helpers, might be superfluous depending on your use case -->
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-util</artifactId>
-            <version>0.9.1.v20140329</version>
+            <version>${aether.version}</version>
         </dependency>
 
         <dependency>
