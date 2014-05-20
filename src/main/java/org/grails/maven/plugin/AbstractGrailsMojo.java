@@ -18,7 +18,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.*;
@@ -34,7 +33,6 @@ import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.ExclusionsDependencyFilter;
-import org.eclipse.aether.util.filter.OrDependencyFilter;
 import org.eclipse.aether.util.filter.ScopeDependencyFilter;
 import org.grails.maven.plugin.tools.ForkedGrailsRuntime;
 import org.grails.maven.plugin.tools.GrailsServices;
@@ -60,7 +58,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String DEPENDENCY_FILE_LOC = "org.grails.ide.eclipse.dependencies.filename";
     public static final String GRAILS_BUILD_LISTENERS = "grails.build.listeners";
     public static final String PLUGIN_PREFIX = "grails-";
-    private static final String GRAILS_PLUGIN_NAME_FORMAT = "plugins.%s:%s";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
     public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
@@ -336,7 +333,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
         final String targetDir = this.project.getBuild().getDirectory();
         ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
-        ec.setBuildDependencies(resolveGrailsExecutionPathJars(true));
+        ec.setBuildDependencies( resolveBuildDependencies() );
         List<File> providedDependencies = resolveArtifacts("provided");
         List<File> compileDependencies = resolveArtifacts("compile");
 
@@ -407,10 +404,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             throw new MojoExecutionException(e.getMessage(), e);
         }
 
-    }
-
-    protected File resolveArtifact(Artifact artifact) throws MojoExecutionException {
-        return resolveArtifact(artifact.getGroupId() + ":" + artifact.getId() + ":" + artifact.getVersion());
     }
 
     protected Collection<File> resolveArtifactIds(Collection<String> artifactIds) throws MojoExecutionException {
@@ -530,6 +523,49 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
+    protected List<File> resolveBuildDependencies() throws MojoExecutionException {
+        try {
+
+            /*
+                 * Get the Grails dependencies from the plugin's POM file first.
+                */
+            final MavenProject pluginProject = getPluginProject();
+
+            /*
+                * Add the plugin's dependencies and the project using the plugin's dependencies to the list
+                * of unresolved dependencies.  This is done so they can all be resolved at the same time so
+                * that we get the benefit of Maven's conflict resolution.
+                */
+
+            Set<File> jars = new HashSet<File>();
+            // calculate the Grails version to use from the dependency or grailsVersion setting
+            String grailsVersion = establishGrailsVersion();
+
+            // if it is still null use the plugin version
+            if(grailsVersion == null)
+                grailsVersion = getPluginProject().getVersion();
+
+            if(grailsVersion != null) {
+                String scriptsId = "org.grails:grails-scripts:" + grailsVersion;
+                String bootstrapId = "org.grails:grails-bootstrap:" + grailsVersion;
+                jars.addAll(resolveArtifactIds(Arrays.asList(scriptsId, bootstrapId)));
+            }
+
+            jars.addAll(resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE, new ExclusionsDependencyFilter(Arrays.asList("org.grails:grails-bootstrap"))));
+
+            findAndAddToolsJar(jars);
+            addExtraClassPathEntries(jars);
+
+            return new ArrayList<File>(jars);
+        } catch (final Exception e) {
+            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
+        }
+    }
+
+    protected String establishGrailsVersion() {
+        Artifact grailsDependency = findGrailsDependency(project);
+        return grailsDependency != null ? grailsDependency.getVersion() : this.grailsVersion;
+    }
 
 
     private void handleVersionSync() throws MojoExecutionException {
@@ -630,126 +666,47 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
 
 
-    private static List<String> BOOTSTRAP_DEPENDENCIES = new ArrayList<String>() {{
-        add("grails-launcher");
-        add("ivy");
-        add("ant");
-        add("jansi");
-        add("jline");
-        add("grails-maven-plugin");
-    }};
-
-    private List<File> resolveGrailsExecutionPathJars(boolean pluginOnly) throws MojoExecutionException {
-        try {
-            final Set<Artifact> resolvedArtifacts = new HashSet<Artifact>();
-
-            /*
-                 * Get the Grails dependencies from the plugin's POM file first.
-                */
-            final MavenProject pluginProject = getPluginProject();
-
-            /*
-                * Add the plugin's dependencies and the project using the plugin's dependencies to the list
-                * of unresolved dependencies.  This is done so they can all be resolved at the same time so
-                * that we get the benefit of Maven's conflict resolution.
-                */
-
-            Set<File> jars = new HashSet<File>();
-            if(pluginOnly) {
-                // calculate the Grails version to use from the dependency or grailsVersion setting
-                Artifact grailsDependency = findGrailsDependency(project);
-                String grailsVersion = grailsDependency != null ? grailsDependency.getVersion() : this.grailsVersion;
-
-                // if it is still null use the plugin version
-                if(grailsVersion == null)
-                    grailsVersion = getPluginProject().getVersion();
-
-                if(grailsVersion != null) {
-                    String scriptsId = "org.grails:grails-scripts:" + grailsVersion;
-                    String bootstrapId = "org.grails:grails-bootstrap:" + grailsVersion;
-                    jars.addAll( resolveArtifactIds(Arrays.asList(scriptsId, bootstrapId)) );
+    private void addExtraClassPathEntries(Set<File> jars) {
+        if (extraClasspathEntries != null) {
+            String[] entriesArr = extraClasspathEntries.split(",");
+            for (int i = 0; i < entriesArr.length; i++) {
+                // check for comma
+                String entry;
+                if (entriesArr[i].endsWith("\\") && i < entriesArr.length-1) {
+                    entry = entriesArr[i] + "," + entriesArr[++i];
+                } else {
+                    entry = entriesArr[i];
                 }
-                jars.addAll(resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE, new ExclusionsDependencyFilter(Arrays.asList("org.grails:grails-bootstrap"))));
-
-            }
-            else {
-                jars.addAll( resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE) );
-                jars.addAll( resolveArtifacts(project, COMPILE_PLUS_RUNTIME_SCOPE) );
-            }
-
-
-            /*
-            * Convert each resolved artifact into a URL/classpath element.
-            */
-            List<String> pluginDependencies = new ArrayList<String>();
-            for (Object o : pluginProject.getDependencies()) {
-                Dependency d = (Dependency) o;
-                pluginDependencies.add(d.getArtifactId());
-            }
-            pluginDependencies.addAll(BOOTSTRAP_DEPENDENCIES);
-            
-
-            int index = 0;
-            for (Artifact resolvedArtifact : resolvedArtifacts) {
-                final File file = resolvedArtifact.getFile();
-                if (file != null && !pluginOnly) {
-                    jars.add(file);
+                File file = new File(entry);
+                if (!file.exists()) {
+                    this.getLog().warn("Grails extra classpath entry " + file + " does not exist.", new Exception());
                 }
-                else if(file != null) {
-
-                    for (String dependency : pluginDependencies) {
-
-                        if(file.getName().contains(dependency)) {
-                            jars.add(file); break;
-                        }
-                    }
-                }
+                jars.add(file);
             }
-
-            /*
-                * Add the "tools.jar" to the classpath so that the Grails scripts can run native2ascii.
-                * First assume that "java.home" points to a JRE within a JDK.  NOTE that this will not
-                * provide a valid path on Mac OSX.  This is not a big deal, as the JDK on Mac OSX already
-                * adds the required JAR's to the classpath.  This logic is really only for Windows/*Unix.
-                */
-            final String javaHome = System.getProperty("java.home");
-            File toolsJar = new File(javaHome, "../lib/tools.jar");
-            if (!toolsJar.exists()) {
-                // The "tools.jar" cannot be found with that path, so
-                // now try with the assumption that "java.home" points
-                // to a JDK.
-                toolsJar = new File(javaHome, "tools.jar");
-            }
-            if (toolsJar.exists()) {
-                if (toolsJar != null) {
-                    jars.add(toolsJar);
-                }
-            }
-            
-            if (extraClasspathEntries != null) {
-                String[] entriesArr = extraClasspathEntries.split(",");
-                for (int i = 0; i < entriesArr.length; i++) {
-                    // check for comma
-                    String entry;
-                    if (entriesArr[i].endsWith("\\") && i < entriesArr.length-1) {
-                        entry = entriesArr[i] + "," + entriesArr[++i];
-                    } else {
-                        entry = entriesArr[i];
-                    }
-                    File file = new File(entry);
-                    if (!file.exists()) {
-                        this.getLog().warn("Grails extra classpath entry " + file + " does not exist.", new Exception());
-                    }
-                    jars.add(file);
-                }
-            }
-            
-            return new ArrayList<File>(jars);
-        } catch (final Exception e) {
-            throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
     }
 
+    /*
+    * Add the "tools.jar" to the classpath so that the Grails scripts can run native2ascii.
+    * First assume that "java.home" points to a JRE within a JDK.  NOTE that this will not
+    * provide a valid path on Mac OSX.  This is not a big deal, as the JDK on Mac OSX already
+    * adds the required JAR's to the classpath.  This logic is really only for Windows/*Unix.
+    */
+    private void findAndAddToolsJar(Set<File> jars) {
+        final String javaHome = System.getProperty("java.home");
+        File toolsJar = new File(javaHome, "../lib/tools.jar");
+        if (!toolsJar.exists()) {
+            // The "tools.jar" cannot be found with that path, so
+            // now try with the assumption that "java.home" points
+            // to a JDK.
+            toolsJar = new File(javaHome, "tools.jar");
+        }
+        if (toolsJar.exists()) {
+            if (toolsJar != null) {
+                jars.add(toolsJar);
+            }
+        }
+    }
 
 
     private MavenProject getPluginProject() throws ProjectBuildingException {
