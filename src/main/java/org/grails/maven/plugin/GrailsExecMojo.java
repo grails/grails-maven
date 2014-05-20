@@ -17,7 +17,7 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import grails.util.GrailsNameUtils;
+import org.grails.maven.plugin.tools.DefaultGrailsServices;
 
 /**
  * Executes an arbitrary Grails command.
@@ -48,6 +48,6 @@ public class GrailsExecMojo extends AbstractGrailsMojo {
     private String args;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        runGrails(GrailsNameUtils.getNameFromScript(command), args);
+        runGrails(DefaultGrailsServices.getClassNameForLowerCaseHyphenSeparatedName(command), args);
     }
 }

@@ -37,7 +37,9 @@ import org.grails.maven.plugin.tools.GrailsServices;
 /**
  * Creates a creates a maven 2 POM for an existing Grails project.
  *
+ * @author Graeme Rocher
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
+ *
  * @version $Id$
  * @description Creates a creates a maven 2 POM for on an existing Grails
  * project.
@@ -46,8 +48,7 @@ import org.grails.maven.plugin.tools.GrailsServices;
  * @requiresDependencyResolution runtime
  * @since 0.1
  */
-public class CreatePomMojo extends AbstractMojo {
-    private static final Pattern VAR_PATTERN = Pattern.compile("\\$\\{(.+?)\\}");
+public class CreatePomMojo extends AbstractGrailsMojo {
 
     /**
      * The Group Id of the project to be build.
@@ -56,13 +57,6 @@ public class CreatePomMojo extends AbstractMojo {
      * @required
      */
     private String groupId;
-
-    /**
-     * Does the plugin generate maven-eclipse-plugin settings in your pom ?
-     *
-     * @parameter expression="${addEclipseSettings}"
-     */
-//    private boolean addEclipseSettings;
 
     /**
      * @parameter expression="${basedir}"
@@ -79,70 +73,6 @@ public class CreatePomMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         grailsServices.setBasedir(basedir);
-        final GrailsProject grailsDescr = grailsServices.readProjectDescriptor();
-
-        final Map<String,String> varSubstitutions = new HashMap<String,String>();
-        varSubstitutions.put("groupId", groupId);
-        varSubstitutions.put("artifactId", grailsDescr.getAppName());
-        varSubstitutions.put("version", grailsDescr.getAppVersion());
-
-        // Load the template POM from the archetype (which is on the
-        // classpath).
-        final InputStream input = getClass().getClassLoader().getResourceAsStream("archetype-resources/pom.xml");
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-            writer = new BufferedWriter(new FileWriter(new File(basedir, "pom.xml")));
-
-            // Substitute variables/tokens with the appropriate text.
-            // Anything that looks like "${...}" is treated as a variable,
-            // but only if the variable name is in the "varSubstitutions"
-            // map does the replacement take place.
-            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-                final Matcher matcher = VAR_PATTERN.matcher(line);
-                final StringBuffer buf = new StringBuffer(line.length());
-
-                // Find all variable expansion patterns in this line.
-                while (matcher.find()) {
-                    // Get the substitution string for the variable
-                    // name.
-                    String sub = varSubstitutions.get(matcher.group(1));
-                    if (sub == null) {
-                        // No substitution string found for this name,
-                        // so we simply add the original text. Since
-                        // the variable expansion text has a "$" in it,
-                        // we need to quote it before using it as a
-                        // substitution string.
-                        sub = Matcher.quoteReplacement(matcher.group());
-                    }
-                    matcher.appendReplacement(buf, sub);
-                }
-                matcher.appendTail(buf);
-
-                // Write the substituted line to the POM file.
-                writer.write(buf.toString());
-                writer.newLine();
-            }
-        } catch (final IOException e) {
-            throw new MojoExecutionException("Failed to create POM file.", e);
-        } finally {
-            if (reader != null) try { reader.close(); } catch (final IOException e) {}
-            if (writer != null) try { writer.close(); } catch (final IOException e) {}
-        }
-
-        // Add the web.xml file that's required to get the packaging
-        // working.
-        final File webXml = new File(basedir, "src/main/webapp/WEB-INF/web.xml");
-        if (!webXml.exists()) {
-            webXml.getParentFile().mkdirs();
-            try {
-                webXml.createNewFile();
-            } catch (final IOException e) {
-                getLog().warn("Unable to create the dummy web descriptor '" + webXml.getPath() +
-                        "' - " + "the package phase won't work without it, so you should create " +
-                        "it (an empty file) manually. Reason: " + e.getMessage());
-            }
-        }
+        runGrails("CreatePom", this.groupId);
     }
 }

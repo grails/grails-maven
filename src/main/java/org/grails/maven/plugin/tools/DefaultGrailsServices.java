@@ -15,26 +15,16 @@
  */
 package org.grails.maven.plugin.tools;
 
-import grails.util.GrailsNameUtils;
 import groovy.lang.GroovyClassLoader;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Properties;
-
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginManagement;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.groovy.grails.plugins.AstPluginDescriptorReader;
 import org.codehaus.groovy.grails.plugins.GrailsPluginInfo;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
+
+import java.io.*;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
@@ -47,6 +37,30 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
     private static final String FILE_SUFFIX = "GrailsPlugin.groovy";
 
     private File _basedir;
+
+    /**
+     * Converts foo-bar into FooBar. Empty and null strings are returned as-is.
+     *
+     * @param name The lower case hyphen separated name
+     * @return The class name equivalent.
+     */
+    public static String getClassNameForLowerCaseHyphenSeparatedName(String name) {
+        // Handle null and empty strings.
+        if (name == null || name.length() == 0) return name;
+
+        if (name.indexOf('-') == -1) {
+            return name.substring(0,1).toUpperCase() + name.substring(1);
+        }
+
+        StringBuilder buf = new StringBuilder();
+        String[] tokens = name.split("-");
+        for (String token : tokens) {
+            if (token == null || token.length() == 0) continue;
+            buf.append(token.substring(0, 1).toUpperCase())
+                    .append(token.substring(1));
+        }
+        return buf.toString();
+    }
 //    private List _dependencyPaths;
 
     private File getBasedir() {
@@ -124,7 +138,7 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         pluginProject.setFileName(descriptor);
 
         final String className = descriptor.getName().substring(0, descriptor.getName().length() - ".groovy".length());
-        final String pluginName = GrailsNameUtils.getScriptName(GrailsNameUtils.getLogicalName(className, "GrailsPlugin"));
+        final String pluginName = getClassNameForLowerCaseHyphenSeparatedName(getLogicalName(className, "GrailsPlugin"));
         pluginProject.setPluginName(pluginName);
 
         final GroovyClassLoader classLoader = new GroovyClassLoader();
@@ -138,5 +152,38 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
 
         pluginProject.setVersion(version);
         return pluginProject;
+    }
+
+    /**
+     * Retrieves the logical name of the class without the trailing name
+     * @param name The name of the class
+     * @param trailingName The trailing name
+     * @return The logical name
+     */
+    public static String getLogicalName(String name, String trailingName) {
+        if (trailingName == null || trailingName.length() == 0) {
+            return getShortName(name);
+        }
+
+        String shortName = getShortName(name);
+        if (shortName.indexOf(trailingName) == - 1) {
+            return name;
+        }
+
+        return shortName.substring(0, shortName.length() - trailingName.length());
+    }
+
+    /**
+     * Returns the class name without the package prefix.
+     *
+     * @param className The class name to get a short name for
+     * @return The short name of the class
+     */
+    public static String getShortName(String className) {
+        int i = className.lastIndexOf(".");
+        if (i > -1) {
+            className = className.substring(i + 1, className.length());
+        }
+        return className;
     }
 }
