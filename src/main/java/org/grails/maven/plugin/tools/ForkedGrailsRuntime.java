@@ -2,7 +2,6 @@ package org.grails.maven.plugin.tools;
 
 import groovy.lang.GroovyRuntimeException;
 import org.codehaus.groovy.grails.io.support.GrailsIOUtils;
-import org.codehaus.groovy.grails.io.support.MultiplexingOutputStream;
 import org.grails.launcher.GrailsLauncher;
 import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.AbstractGrailsMojo;
