@@ -59,20 +59,13 @@ public class CreatePomMojo extends AbstractGrailsMojo {
     private String groupId;
 
     /**
-     * @parameter expression="${basedir}"
-     * @required
-     * @readonly
-     */
-    private File basedir;
-
-    /**
      * @component
      * @readonly
      */
     protected GrailsServices grailsServices;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        grailsServices.setBasedir(basedir);
+        grailsServices.setBasedir(getBasedir());
         runGrails("CreatePom", this.groupId);
     }
 }
