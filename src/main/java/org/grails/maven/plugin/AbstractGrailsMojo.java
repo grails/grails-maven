@@ -541,10 +541,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             // calculate the Grails version to use from the dependency or grailsVersion setting
             String grailsVersion = establishGrailsVersion();
 
-            // if it is still null use the plugin version
-            if(grailsVersion == null)
-                grailsVersion = getPluginProject().getVersion();
-
             if(grailsVersion != null) {
                 String scriptsId = "org.grails:grails-scripts:" + grailsVersion;
                 String bootstrapId = "org.grails:grails-bootstrap:" + grailsVersion;
@@ -562,9 +558,31 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
     }
 
-    protected String establishGrailsVersion() {
-        Artifact grailsDependency = findGrailsDependency(project);
-        return grailsDependency != null ? grailsDependency.getVersion() : this.grailsVersion;
+    protected String establishGrailsVersion() throws ProjectBuildingException {
+        if(this.grailsVersion == null) {
+            Artifact grailsDependency = findGrailsDependency(project);
+            if(grailsDependency != null) {
+                this.grailsVersion = grailsDependency.getVersion();
+            }
+            else {
+                this.grailsVersion = findGrailsVersionFromPlugin();
+            }
+        }
+        return this.grailsVersion;
+    }
+
+    private String findGrailsVersionFromPlugin() throws ProjectBuildingException {
+        MavenProject pluginProject = getPluginProject();
+        Set<Artifact> dependencyArtifacts = pluginProject.getArtifacts();
+        if(dependencyArtifacts != null) {
+            for (Artifact artifact : dependencyArtifacts) {
+                if (artifact.getArtifactId().equals("grails-bootstrap") &&
+                        artifact.getGroupId().equals("org.grails")) {
+                    return artifact.getVersion();
+                }
+            }
+        }
+        return pluginProject.getVersion();
     }
 
 
