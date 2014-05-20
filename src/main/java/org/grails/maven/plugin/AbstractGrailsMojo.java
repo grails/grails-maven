@@ -389,8 +389,8 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             if(springLoadedJar != null) {
                 fgr.setReloadingAgent(springLoadedJar);
             }else{
-                getLog().warn("Grails Start with Reloading: org.springsource.springloaded:springloaded-core"+SPRING_LOADED_VERSION+" not found");
-                getLog().error("Grails Start with Reloading: not enabled");
+                getLog().warn("Grails Reloading: org.springframework:springloaded:"+SPRING_LOADED_VERSION+" not found");
+                getLog().error("Grails Reloading: not enabled");
             }
         }
         fgr.setDebug(forkDebug);
@@ -452,7 +452,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 " from " + remoteRepos);
 
         ArtifactResult result;
-        File file = null;
+        File file;
         try
         {
             result = repoSystem.resolveArtifact( repoSession, request );
