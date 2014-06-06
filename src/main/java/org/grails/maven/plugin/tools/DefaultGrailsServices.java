@@ -61,6 +61,22 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         }
         return buf.toString();
     }
+
+    /**
+   	 * The regular expression used to find camel case boundaries with a string.
+   	 */
+   	private static final String CAMEL_CASE_CONVERSION = "([a-z0-9])(?=[A-Z])";
+
+    /**
+     * Converts FooBar into foo-bar. Empty and null strings are returned as-is.
+     *
+     * @param name The lower case hyphen separated name
+     * @return The class name equivalent.
+     */
+    public static String getLowerCaseHyphenSeparatedName(String name) {
+        if (name == null || name.length() == 0) return name;
+        return name.replaceAll(CAMEL_CASE_CONVERSION, "$1-").toLowerCase();
+    }
 //    private List _dependencyPaths;
 
     private File getBasedir() {
@@ -138,7 +154,7 @@ public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsS
         pluginProject.setFileName(descriptor);
 
         final String className = descriptor.getName().substring(0, descriptor.getName().length() - ".groovy".length());
-        final String pluginName = getClassNameForLowerCaseHyphenSeparatedName(getLogicalName(className, "GrailsPlugin"));
+        final String pluginName = getLowerCaseHyphenSeparatedName(getLogicalName(className, "GrailsPlugin"));
         pluginProject.setPluginName(pluginName);
 
         final GroovyClassLoader classLoader = new GroovyClassLoader();
