@@ -60,6 +60,7 @@
         <junit.version>4.11</junit.version>
         <maven-plugin-testing-harness.version>3.1.0</maven-plugin-testing-harness.version>
         <xmlunit.version>1.0</xmlunit.version>
+        <spock.version>0.7-groovy-2.0</spock.version>
     </properties>
 
     <prerequisites>
@@ -204,6 +205,27 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>${spock.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit-dep</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
 
     </dependencies>
@@ -226,12 +248,52 @@
                         
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
+                    <includes>
+                        <include>**/*Test.*</include>
+                        <include>**/*Spec.*</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                   <groupId>org.codehaus.mojo</groupId>
+                   <artifactId>build-helper-maven-plugin</artifactId>
+                   <version>1.7</version>
+                   <executions>
+                     <execution>
+                           <id>add-test-source</id>
+                           <phase>generate-test-sources</phase>
+                           <goals>
+                             <goal>add-test-source</goal>
+                           </goals>
+                           <configuration>
+                             <sources>
+                                   <source>src/test/groovy</source>
+                             </sources>
+                           </configuration>
+                     </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                     <sourceIncludes>
+                        <sourceInclude>**/*.groovy</sourceInclude>
+                      </sourceIncludes>
+                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>2.7.0-01</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
