@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.grails</groupId>
     <artifactId>grails-maven-plugin</artifactId>
-    <version>2.4.0</version>
+    <version>2.4.1</version>
     <packaging>maven-plugin</packaging>
 
     <name>Maven plugin for GRAILS applications</name>
@@ -48,10 +48,10 @@
         <maven.version>3.1.0</maven.version>
 
         <!-- Dependencies -->
-        <groovy.version>2.3.1</groovy.version>
-        <grails.version>2.4.0</grails.version>
+        <groovy.version>2.3.3</groovy.version>
+        <grails.version>2.4.1</grails.version>
         <grails-launcher.version>1.0.5</grails-launcher.version>
-        <aether.version>0.9.1.v20140329</aether.version>
+        <aether.version>1.0.0.v20140518</aether.version>
         <maven-model.version>${maven.version}</maven-model.version>
         <maven-plugin-api.version>${maven.version}</maven-plugin-api.version>
         <maven-project.version>2.2.1</maven-project.version>
@@ -368,43 +368,4 @@
             </plugin>
         </plugins>
     </reporting>
-
-    <profiles>
-        <profile>
-            <id>jdk_windows</id>
-            <activation>
-                <os>
-                    <family>Windows</family>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>1.6</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>jdk_unix</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>!mac os x</name> <!-- needed due to MNG-4983 -->
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>1.6</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
 </project>
