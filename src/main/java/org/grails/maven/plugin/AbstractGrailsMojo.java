@@ -99,6 +99,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected String grailsVersion;
 
     /**
+     * The version of Groovy used
+     */
+    private String groovyVersion;
+
+    /**
      * The Grails work directory to use.
      *
      * @parameter expression="${grails.grailsWorkDir}" default-value="${project.build.directory}/work"
@@ -272,6 +277,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @readonly
      */
     private List<RemoteRepository> remoteRepos;
+
 
     protected AbstractGrailsMojo() {
     }
@@ -540,14 +546,16 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             Set<File> jars = new HashSet<File>();
             // calculate the Grails version to use from the dependency or grailsVersion setting
             String grailsVersion = establishGrailsVersion();
+            String groovyVersion = establishGroovyVersion();
 
             if(grailsVersion != null) {
                 String scriptsId = "org.grails:grails-scripts:" + grailsVersion;
                 String bootstrapId = "org.grails:grails-bootstrap:" + grailsVersion;
-                jars.addAll(resolveArtifactIds(Arrays.asList(scriptsId, bootstrapId)));
+                String groovyId = "org.codehaus.groovy:groovy-all:" + groovyVersion;
+                jars.addAll(resolveArtifactIds(Arrays.asList(scriptsId, bootstrapId, groovyId)));
             }
 
-            jars.addAll(resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE, new ExclusionsDependencyFilter(Arrays.asList("org.grails:grails-bootstrap"))));
+            jars.addAll(resolveArtifacts(pluginProject, COMPILE_PLUS_RUNTIME_SCOPE, new ExclusionsDependencyFilter(Arrays.asList("org.grails:grails-bootstrap", "org.codehaus.groovy:groovy-all", "org.codehaus.groovy:groovy"))));
 
             findAndAddToolsJar(jars);
             addExtraClassPathEntries(jars);
@@ -556,6 +564,28 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         } catch (final Exception e) {
             throw new MojoExecutionException("Failed to create classpath for Grails execution.", e);
         }
+    }
+
+    protected String establishGroovyVersion() throws ProjectBuildingException {
+        if(this.groovyVersion == null) {
+            Artifact groovyDependency = findGroovyDependency(project);
+            if(groovyDependency != null) {
+                this.groovyVersion = groovyDependency.getVersion();
+            }
+            else {
+                String grailsVersion = establishGrailsVersion();
+                if(grailsVersion.startsWith("2.3")) {
+                    this.groovyVersion = "2.1.9";
+                }
+                else {
+                    this.groovyVersion = findGroovyVersionFromPlugin();
+                    if(this.groovyVersion == null) {
+                        this.groovyVersion = "2.3.3";
+                    }
+                }
+            }
+        }
+        return this.groovyVersion;
     }
 
     protected String establishGrailsVersion() throws ProjectBuildingException {
@@ -572,12 +602,20 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     }
 
     private String findGrailsVersionFromPlugin() throws ProjectBuildingException {
+        return findArtefactVersionFromPlugin("org.grails", "grails-bootstrap");
+    }
+
+    private String findGroovyVersionFromPlugin() throws ProjectBuildingException {
+        return findArtefactVersionFromPlugin("org.codehaus.groovy", "groovy");
+    }
+
+    private String findArtefactVersionFromPlugin(String group, String name) throws ProjectBuildingException {
         MavenProject pluginProject = getPluginProject();
         Set<Artifact> dependencyArtifacts = pluginProject.getArtifacts();
         if(dependencyArtifacts != null) {
             for (Artifact artifact : dependencyArtifacts) {
-                if (artifact.getArtifactId().equals("grails-bootstrap") &&
-                        artifact.getGroupId().equals("org.grails")) {
+                if (artifact.getArtifactId().equals(name) &&
+                        artifact.getGroupId().equals(group)) {
                     return artifact.getVersion();
                 }
             }
@@ -659,6 +697,20 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
         return null;
     }
+
+    private Artifact findGroovyDependency(MavenProject project) {
+        Set dependencyArtifacts = project.getDependencyArtifacts();
+        for (Object o : dependencyArtifacts) {
+            Artifact artifact = (Artifact) o;
+            String groupId = artifact.getGroupId();
+            if (artifact.getArtifactId().equals("org.codehaus.groovy") &&
+                    (groupId.equals("groovy-all") || groupId.equals("groovy"))) {
+                return artifact;
+            }
+        }
+        return null;
+    }
+
 
 
     private void configureMavenProxy() {
