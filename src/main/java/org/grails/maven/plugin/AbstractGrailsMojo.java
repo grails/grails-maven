@@ -703,8 +703,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         for (Object o : dependencyArtifacts) {
             Artifact artifact = (Artifact) o;
             String groupId = artifact.getGroupId();
-            if (artifact.getArtifactId().equals("org.codehaus.groovy") &&
-                    (groupId.equals("groovy-all") || groupId.equals("groovy"))) {
+            String artifactId = artifact.getArtifactId();
+
+            if (groupId.equals("org.codehaus.groovy") &&
+                    (artifactId.equals("groovy-all") || artifactId.equals("groovy"))) {
                 return artifact;
             }
         }
