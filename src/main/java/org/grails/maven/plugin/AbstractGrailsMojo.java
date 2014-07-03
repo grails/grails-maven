@@ -18,6 +18,7 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.*;
@@ -611,16 +612,16 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     private String findArtefactVersionFromPlugin(String group, String name) throws ProjectBuildingException {
         MavenProject pluginProject = getPluginProject();
-        Set<Artifact> dependencyArtifacts = pluginProject.getArtifacts();
+        List<Dependency> dependencyArtifacts = pluginProject.getDependencies();
         if(dependencyArtifacts != null) {
-            for (Artifact artifact : dependencyArtifacts) {
-                if (artifact.getArtifactId().equals(name) &&
-                        artifact.getGroupId().equals(group)) {
-                    return artifact.getVersion();
+            for (Dependency d : dependencyArtifacts) {
+                if (d.getArtifactId().equals(name) &&
+                        d.getGroupId().equals(group)) {
+                    return d.getVersion();
                 }
             }
         }
-        return pluginProject.getVersion();
+        return null;
     }
 
 
