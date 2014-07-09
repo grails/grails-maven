@@ -50,6 +50,39 @@ public class ForkedGrailsRuntime {
         this.debug = debug;
     }
 
+    public void nofork() {
+        FileOutputStream fos = null;
+        File tempFile = null;
+        try {
+            String baseName = executionContext.getBaseDir().getCanonicalFile().getName();
+            tempFile = File.createTempFile(baseName, "grails-execution-context");
+            tempFile.deleteOnExit();
+
+            System.setProperty("grails.build.execution.context", tempFile.getCanonicalPath());
+
+            fos = new FileOutputStream(tempFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(executionContext);
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
+        } catch (IOException e) {
+            throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
+            /*
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Fatal error forking Grails JVM: " + e.getMessage() , e);
+            */
+        } finally {
+            if(fos  != null) try {
+                fos.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+
+        main(new String[]{});
+    }
+
     public void fork() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         StringBuilder cp = new StringBuilder();
@@ -65,7 +98,7 @@ public class ForkedGrailsRuntime {
             String baseName = executionContext.getBaseDir().getCanonicalFile().getName();
             tempFile = File.createTempFile(baseName, "grails-execution-context");
             tempFile.deleteOnExit();
-            
+
             fos = new FileOutputStream(tempFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(executionContext);

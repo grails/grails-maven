@@ -405,7 +405,12 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         fgr.setMinMemory(forkMinMemory);
         try {
             handleVersionSync();
-            fgr.fork();
+            getLog().info("Starting " + (fork ? "forked" : "unforked") + " grails project.");
+            if(fork) {
+                fgr.fork();
+            } else {
+                fgr.nofork();
+            }
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
         }
