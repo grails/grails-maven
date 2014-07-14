@@ -756,7 +756,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 }
                 File file = new File(entry);
                 if (!file.exists()) {
-                    this.getLog().warn("Grails extra classpath entry " + file + " does not exist.", new Exception());
+                    this.getLog().warn("Grails extra classpath entry " + file + " does not exist.");
                 }
                 jars.add(file);
             }
