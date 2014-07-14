@@ -232,7 +232,7 @@ public class ForkedGrailsRuntime {
         List<File> loggingBootstrapJars = new ArrayList<File>();
         for (File file : compileDependencies) {
             String name = file.getName();
-            if(name.contains("slf4j") || name.contains("log4j") || name.contains("spring-core")) {
+            if(name.contains("slf4j") || name.contains("log4j") || name.contains("spring-core") || name.contains("logback")) {
                 loggingBootstrapJars.add(file);
             }
         }
