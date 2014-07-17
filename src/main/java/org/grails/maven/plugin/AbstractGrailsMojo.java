@@ -652,10 +652,16 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         final Properties metadata = new Properties();
 
         File metadataFile = new File(getBasedir(), "application.properties");
-        if(metadataFile.exists()) {
-            FileReader reader = null;
-            FileWriter writer = null;
-            try {
+
+        FileReader reader = null;
+        FileWriter writer = null;
+        try {
+            boolean created = true;
+            if(!metadataFile.exists()) {
+                created = metadataFile.createNewFile();
+            }
+
+            if(created) {
                 reader = new FileReader(metadataFile);
                 metadata.load(reader);
 
@@ -666,20 +672,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                     writer = new FileWriter(metadataFile);
                     metadata.store(writer, "Grails Metadata file");
                 }
-            } catch (IOException e) {
-                throw new MojoExecutionException("Failed to sync application version with Maven plugin defined version");
-            } finally {
-                try {
-                    if(reader != null)
-                        reader.close();
-                    if(writer != null)
-                        writer.close();
-                } catch (IOException e) {
-                    // ignore
-                }
             }
-
-
+        } catch (IOException e) {
+            throw new MojoExecutionException("Failed to sync application version with Maven plugin defined version");
+        } finally {
+            try {
+                if(reader != null)
+                    reader.close();
+                if(writer != null)
+                    writer.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 
