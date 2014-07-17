@@ -66,6 +66,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String PLUGIN_PREFIX = "grails-";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
+    public static final String APP_NAME = "app.name";
     public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
     public static final List<String> COMPILE_PLUS_RUNTIME_SCOPE = Arrays.asList("compile", "runtime");
 
@@ -701,11 +702,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
 
         Object appVersion = metadata.get(APP_VERSION);
-        if (appVersion != null) {
-            if (!project.getVersion().equals(appVersion)) {
-                metadata.put(APP_VERSION, project.getVersion());
-                result = true;
-            }
+        if (!project.getVersion().equals(appVersion)) {
+            metadata.put(APP_VERSION, project.getVersion());
+            result = true;
+        }
+
+        Object appName = metadata.get(APP_NAME);
+        if (!project.getName().equals(appName)) {
+            metadata.put(APP_NAME, project.getName());
+            result = true;
         }
 
         return result;
