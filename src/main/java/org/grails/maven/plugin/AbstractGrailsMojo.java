@@ -34,6 +34,10 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.ExclusionsDependencyFilter;
 import org.eclipse.aether.util.filter.ScopeDependencyFilter;
+import org.grails.launcher.GrailsLauncher;
+import org.grails.launcher.RootLoader;
+import org.grails.maven.plugin.tools.AbstractGrailsRuntime;
+import org.grails.maven.plugin.tools.DefaultGrailsRuntime;
 import org.grails.maven.plugin.tools.ForkedGrailsRuntime;
 import org.grails.maven.plugin.tools.GrailsServices;
 
@@ -41,6 +45,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -323,6 +329,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName) throws MojoExecutionException {
+        getLog().info("--------------------------------------------------------------------------------");
+        getLog().info("| Running grails target: " + targetName);
+        getLog().info("| Running forked vm:     " + fork);
+        getLog().info("--------------------------------------------------------------------------------");
         runGrails(targetName, System.getProperty("grails.cli.args"));
     }
 
@@ -337,6 +347,36 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
         configureMavenProxy();
 
+        if(fork) {
+            ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(createExecutionContext(targetName, args));
+            if (activateAgent) {
+                File springLoadedJar = resolveArtifact("org.springframework:springloaded:" + SPRING_LOADED_VERSION);
+                if (springLoadedJar != null) {
+                    fgr.setReloadingAgent(springLoadedJar);
+                } else {
+                    getLog().warn("Grails Reloading: org.springframework:springloaded:" + SPRING_LOADED_VERSION + " not found");
+                    getLog().error("Grails Reloading: not enabled");
+                }
+            }
+            fgr.setDebug(forkDebug);
+            fgr.setMaxMemory(forkMaxMemory);
+            fgr.setMaxPerm(forkPermGen);
+            fgr.setMinMemory(forkMinMemory);
+            try {
+                handleVersionSync();
+                fgr.run();
+            } catch (Exception e) {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
+
+        } else {
+            DefaultGrailsRuntime dgr = new DefaultGrailsRuntime(createExecutionContext(targetName, args));
+            dgr.run();
+        }
+
+    }
+
+    protected AbstractGrailsRuntime.ExecutionContext createExecutionContext(String targetName, String args) throws MojoExecutionException {
         final String targetDir = this.project.getBuild().getDirectory();
         ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
         ec.setBuildDependencies( resolveBuildDependencies() );
@@ -389,33 +429,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         ec.setScriptName(targetName);
         ec.setBaseDir(project.getBasedir());
         ec.setEnv(getEnvironment());
-        ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
-        if(activateAgent) {
-            File springLoadedJar = resolveArtifact("org.springframework:springloaded:" + SPRING_LOADED_VERSION);
-            if(springLoadedJar != null) {
-                fgr.setReloadingAgent(springLoadedJar);
-            }else{
-                getLog().warn("Grails Reloading: org.springframework:springloaded:"+SPRING_LOADED_VERSION+" not found");
-                getLog().error("Grails Reloading: not enabled");
-            }
-        }
-        fgr.setDebug(forkDebug);
-        fgr.setMaxMemory(forkMaxMemory);
-        fgr.setMaxPerm(forkPermGen);
-        fgr.setMinMemory(forkMinMemory);
-        try {
-            handleVersionSync();
-            getLog().info("Starting " + (fork ? "forked" : "unforked") + " grails project.");
-            if(fork) {
-                fgr.fork();
-            } else {
-                fgr.nofork();
-            }
-        } catch (Exception e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
 
+        return ec;
     }
+
 
     protected Collection<File> resolveArtifactIds(Collection<String> artifactIds) throws MojoExecutionException {
         Collection<ArtifactRequest> requests = new ArrayList<ArtifactRequest>();
