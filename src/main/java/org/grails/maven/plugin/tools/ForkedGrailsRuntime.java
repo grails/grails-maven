@@ -1,15 +1,11 @@
 package org.grails.maven.plugin.tools;
 
 import groovy.lang.GroovyRuntimeException;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.groovy.grails.io.support.GrailsIOUtils;
 import org.grails.launcher.GrailsLauncher;
-import org.grails.launcher.RootLoader;
 import org.grails.maven.plugin.AbstractGrailsMojo;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +46,7 @@ public class ForkedGrailsRuntime extends AbstractGrailsRuntime {
         this.debug = debug;
     }
 
-    public void run() throws MojoExecutionException {
+    public void run() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         StringBuilder cp = new StringBuilder();
         cp.append(GrailsIOUtils.findJarFile(ForkedGrailsRuntime.class)).append(File.pathSeparatorChar);

@@ -346,6 +346,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
         configureMavenProxy();
+        handleVersionSync();
 
         if(fork) {
             ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(createExecutionContext(targetName, args));
@@ -363,10 +364,9 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             fgr.setMaxPerm(forkPermGen);
             fgr.setMinMemory(forkMinMemory);
             try {
-                handleVersionSync();
                 fgr.run();
             } catch (Exception e) {
-                throw new MojoExecutionException(e.getMessage(), e);
+                throw new RuntimeException("Error forking vm: ", e);
             }
 
         } else {
