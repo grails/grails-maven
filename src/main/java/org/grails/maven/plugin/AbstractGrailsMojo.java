@@ -34,6 +34,10 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.filter.AndDependencyFilter;
 import org.eclipse.aether.util.filter.ExclusionsDependencyFilter;
 import org.eclipse.aether.util.filter.ScopeDependencyFilter;
+import org.grails.launcher.GrailsLauncher;
+import org.grails.launcher.RootLoader;
+import org.grails.maven.plugin.tools.AbstractGrailsRuntime;
+import org.grails.maven.plugin.tools.DefaultGrailsRuntime;
 import org.grails.maven.plugin.tools.ForkedGrailsRuntime;
 import org.grails.maven.plugin.tools.GrailsServices;
 
@@ -41,6 +45,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -60,6 +66,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String PLUGIN_PREFIX = "grails-";
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
+    public static final String APP_NAME = "app.name";
     public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
     public static final List<String> COMPILE_PLUS_RUNTIME_SCOPE = Arrays.asList("compile", "runtime");
 
@@ -336,7 +343,37 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      */
     protected void runGrails(final String targetName, String args) throws MojoExecutionException {
         configureMavenProxy();
+        handleVersionSync();
 
+        if(fork) {
+            ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(createExecutionContext(targetName, args));
+            if (activateAgent) {
+                File springLoadedJar = resolveArtifact("org.springframework:springloaded:" + SPRING_LOADED_VERSION);
+                if (springLoadedJar != null) {
+                    fgr.setReloadingAgent(springLoadedJar);
+                } else {
+                    getLog().warn("Grails Reloading: org.springframework:springloaded:" + SPRING_LOADED_VERSION + " not found");
+                    getLog().error("Grails Reloading: not enabled");
+                }
+            }
+            fgr.setDebug(forkDebug);
+            fgr.setMaxMemory(forkMaxMemory);
+            fgr.setMaxPerm(forkPermGen);
+            fgr.setMinMemory(forkMinMemory);
+            try {
+                fgr.run();
+            } catch (Exception e) {
+                throw new RuntimeException("Error forking vm: ", e);
+            }
+
+        } else {
+            DefaultGrailsRuntime dgr = new DefaultGrailsRuntime(createExecutionContext(targetName, args));
+            dgr.run();
+        }
+
+    }
+
+    protected AbstractGrailsRuntime.ExecutionContext createExecutionContext(String targetName, String args) throws MojoExecutionException {
         final String targetDir = this.project.getBuild().getDirectory();
         ForkedGrailsRuntime.ExecutionContext ec = new ForkedGrailsRuntime.ExecutionContext();
         ec.setBuildDependencies( resolveBuildDependencies() );
@@ -389,28 +426,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         ec.setScriptName(targetName);
         ec.setBaseDir(project.getBasedir());
         ec.setEnv(getEnvironment());
-        ForkedGrailsRuntime fgr = new ForkedGrailsRuntime(ec);
-        if(activateAgent) {
-            File springLoadedJar = resolveArtifact("org.springframework:springloaded:" + SPRING_LOADED_VERSION);
-            if(springLoadedJar != null) {
-                fgr.setReloadingAgent(springLoadedJar);
-            }else{
-                getLog().warn("Grails Reloading: org.springframework:springloaded:"+SPRING_LOADED_VERSION+" not found");
-                getLog().error("Grails Reloading: not enabled");
-            }
-        }
-        fgr.setDebug(forkDebug);
-        fgr.setMaxMemory(forkMaxMemory);
-        fgr.setMaxPerm(forkPermGen);
-        fgr.setMinMemory(forkMinMemory);
-        try {
-            handleVersionSync();
-            fgr.fork();
-        } catch (Exception e) {
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
 
+        return ec;
     }
+
 
     protected Collection<File> resolveArtifactIds(Collection<String> artifactIds) throws MojoExecutionException {
         Collection<ArtifactRequest> requests = new ArrayList<ArtifactRequest>();
@@ -630,10 +649,16 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         final Properties metadata = new Properties();
 
         File metadataFile = new File(getBasedir(), "application.properties");
-        if(metadataFile.exists()) {
-            FileReader reader = null;
-            FileWriter writer = null;
-            try {
+
+        FileReader reader = null;
+        FileWriter writer = null;
+        try {
+            boolean created = true;
+            if(!metadataFile.exists()) {
+                created = metadataFile.createNewFile();
+            }
+
+            if(created) {
                 reader = new FileReader(metadataFile);
                 metadata.load(reader);
 
@@ -644,20 +669,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                     writer = new FileWriter(metadataFile);
                     metadata.store(writer, "Grails Metadata file");
                 }
-            } catch (IOException e) {
-                throw new MojoExecutionException("Failed to sync application version with Maven plugin defined version");
-            } finally {
-                try {
-                    if(reader != null)
-                        reader.close();
-                    if(writer != null)
-                        writer.close();
-                } catch (IOException e) {
-                    // ignore
-                }
             }
-
-
+        } catch (IOException e) {
+            throw new MojoExecutionException("Failed to sync application version with Maven plugin defined version");
+        } finally {
+            try {
+                if(reader != null)
+                    reader.close();
+                if(writer != null)
+                    writer.close();
+            } catch (IOException e) {
+                // ignore
+            }
         }
     }
 
@@ -675,11 +698,15 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
 
         Object appVersion = metadata.get(APP_VERSION);
-        if (appVersion != null) {
-            if (!project.getVersion().equals(appVersion)) {
-                metadata.put(APP_VERSION, project.getVersion());
-                result = true;
-            }
+        if (!project.getVersion().equals(appVersion)) {
+            metadata.put(APP_VERSION, project.getVersion());
+            result = true;
+        }
+
+        Object appName = metadata.get(APP_NAME);
+        if (!project.getName().equals(appName)) {
+            metadata.put(APP_NAME, project.getName());
+            result = true;
         }
 
         return result;
@@ -751,7 +778,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 }
                 File file = new File(entry);
                 if (!file.exists()) {
-                    this.getLog().warn("Grails extra classpath entry " + file + " does not exist.", new Exception());
+                    this.getLog().warn("Grails extra classpath entry " + file + " does not exist.");
                 }
                 jars.add(file);
             }
