@@ -330,10 +330,6 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * @throws MojoExecutionException if an error occurs while attempting to execute the target.
      */
     protected void runGrails(final String targetName) throws MojoExecutionException {
-        getLog().info("--------------------------------------------------------------------------------");
-        getLog().info("| Running grails target: " + targetName);
-        getLog().info("| Running forked vm:     " + fork);
-        getLog().info("--------------------------------------------------------------------------------");
         runGrails(targetName, System.getProperty("grails.cli.args"));
     }
 
