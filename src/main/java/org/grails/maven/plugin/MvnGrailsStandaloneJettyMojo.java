@@ -1,5 +1,7 @@
 package org.grails.maven.plugin;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -22,6 +24,24 @@ public class MvnGrailsStandaloneJettyMojo extends AbstractGrailsMojo {
     protected File jarFile;
 
     /**
+     * The maven artifact.
+     *
+     * @parameter expression="${project.artifact}"
+     * @required
+     * @readonly
+     */
+    private Artifact artifact;
+
+    /**
+     * The artifact handler.
+     *
+     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-app}"
+     * @required
+     * @readonly
+     */
+    private ArtifactHandler artifactHandler;
+
+    /**
      * Executes the MvnGrailsStandaloneJettyMojo on the current project.
      *
      * @throws MojoExecutionException if an error occured while building the webapp
@@ -41,5 +61,9 @@ public class MvnGrailsStandaloneJettyMojo extends AbstractGrailsMojo {
         }
 
         runGrails("BuildStandalone", "--jetty " + jarFile.toString());
+
+        // Make the WAR file the build artifact.
+        artifact.setFile(jarFile);
+        artifact.setArtifactHandler(artifactHandler);
     }
 }
