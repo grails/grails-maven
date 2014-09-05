@@ -813,7 +813,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
         DefaultProjectBuildingRequest request = new DefaultProjectBuildingRequest();
 
-        request.setLocalRepository(localRepository);
+        request.setLocalRepository(localRepository)
+                .setRemoteRepositories(project.getRemoteArtifactRepositories())
+                .setPluginArtifactRepositories(project.getPluginArtifactRepositories())
+                .setRepositoryMerging(ProjectBuildingRequest.RepositoryMerging.REQUEST_DOMINANT);
         return projectBuilder.build(pluginArtifact, request).getProject();
     }
 
