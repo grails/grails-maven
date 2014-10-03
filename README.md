@@ -27,3 +27,20 @@ As well as hooks into the normal Maven lifecyle like `compile`, `package` and `t
 You can create an example POM with any Grails application by doing:
 
     $ grails create-pom [GROUP ID]
+
+Configuration
+=============
+
+The maven grails plugin now supports any grails version. You can specify the grails version to use by setting the grailsVersion property in the <configuration> section of the maven grails plugin:
+
+    <plugin>
+        <groupId>org.grails</groupId>
+        <artifactId>grails-maven-plugin</artifactId>
+        <version>2.4.3</version>
+        <configuration>
+            <grailsVersion>2.3.10</grailsVersion>
+            <!-- In the 2.4.3 release of grails-maven-plugin, you need to explicitly set the grailsVersion -->
+            <!-- otherwise 2.4.2 will be used -->
+            <!--<grailsVersion>2.4.3</grailsVersion>-->
+        </configuration>
+    </plugin>
