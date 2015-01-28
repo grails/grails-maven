@@ -752,11 +752,11 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
                 String noProxy = activeProxy.getNonProxyHosts();
                 String username = activeProxy.getUsername();
                 String password = activeProxy.getPassword();
-
                 System.setProperty("http.proxyHost", host);
                 System.setProperty("http.proxyPort", String.valueOf(port));
-                System.setProperty("http.nonProxyHosts", noProxy);
-
+                if (noProxy != null) {
+                    System.setProperty("http.nonProxyHosts", noProxy);
+                }
                 if (username != null) {
                     System.setProperty("http.proxyUser", username);
                 }
