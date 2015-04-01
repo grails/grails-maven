@@ -705,10 +705,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
 
         Object appName = metadata.get(APP_NAME);
-        if (!project.getName().equals(appName)) {
+        if (!project.getArtifactId().equals(appName)) {
             metadata.put(APP_NAME, project.getName());
             result = true;
-        }
+        } 
 
         return result;
     }
