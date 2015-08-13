@@ -68,7 +68,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
     public static final String APP_NAME = "app.name";
-    public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
+    public static final String SPRING_LOADED_VERSION = "1.2.4.RELEASE";
     public static final List<String> COMPILE_PLUS_RUNTIME_SCOPE = Arrays.asList("compile", "runtime");
 
     /**
