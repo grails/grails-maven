@@ -68,7 +68,7 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
     public static final String APP_GRAILS_VERSION = "app.grails.version";
     public static final String APP_VERSION = "app.version";
     public static final String APP_NAME = "app.name";
-    public static final String SPRING_LOADED_VERSION = "1.2.0.RELEASE";
+    public static final String SPRING_LOADED_VERSION = "1.2.4.RELEASE";
     public static final List<String> COMPILE_PLUS_RUNTIME_SCOPE = Arrays.asList("compile", "runtime");
 
     /**
@@ -705,10 +705,10 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
         }
 
         Object appName = metadata.get(APP_NAME);
-        if (!project.getName().equals(appName)) {
+        if (!project.getArtifactId().equals(appName)) {
             metadata.put(APP_NAME, project.getName());
             result = true;
-        }
+        } 
 
         return result;
     }
@@ -749,11 +749,14 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
             if (activeProxy != null) {
                 String host = activeProxy.getHost();
                 int port = activeProxy.getPort();
+                String noProxy = activeProxy.getNonProxyHosts();
                 String username = activeProxy.getUsername();
                 String password = activeProxy.getPassword();
-
                 System.setProperty("http.proxyHost", host);
                 System.setProperty("http.proxyPort", String.valueOf(port));
+                if (noProxy != null) {
+                    System.setProperty("http.nonProxyHosts", noProxy);
+                }
                 if (username != null) {
                     System.setProperty("http.proxyUser", username);
                 }
