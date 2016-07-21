@@ -4,6 +4,11 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * <p>Creates a WAR archive and register it in maven. This differs from
@@ -20,35 +25,23 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author Peter Ledbrook
  * @version $Id$
  * @description Creates a WAR archive and register it in maven.
- * @goal maven-grails-app-war
- * @phase package
- * @requiresDependencyResolution
  * @since 1.1
  */
+@Mojo(name = "maven-grails-app-war", defaultPhase = LifecyclePhase.PACKAGE)
 public class MvnGrailsAppWarMojo extends MvnWarMojo {
     /**
      * The maven artifact.
-     *
-     * @parameter expression="${project.artifact}"
-     * @required
-     * @readonly
      */
+    @Parameter(defaultValue = "${project.artifact}")
     private Artifact artifact;
 
     /**
      * The artifact handler.
-     *
-     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-app}"
-     * @required
-     * @readonly
      */
+    @Component(hint = "gails-app")
     private ArtifactHandler artifactHandler;
 
-    /**
-     * Executes the MvnWarMojo on the current project.
-     *
-     * @throws org.apache.maven.plugin.MojoExecutionException if an error occured while building the webapp
-     */
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         super.execute();
 

@@ -18,6 +18,9 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a new Grails unit test. A unit test requires that you mock out access
@@ -27,20 +30,18 @@ import org.apache.maven.plugin.MojoFailureException;
  * @version $Id$
  * @description Creates a new Grails unit test. A unit test requires that you
  * mock out access to dynamic methods, but executes a lot quicker.
- * @goal create-unit-test
- * @requiresProject false
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "create-unit-test",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateUnitTestMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the unit test to create.
-     *
-     * @parameter expression="${unitTestName}"
      */
+    @Parameter(property = "unitTestName")
     private String unitTestName;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateUnitTest", unitTestName);
     }

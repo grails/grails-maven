@@ -17,6 +17,9 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a new GSP tag library.
@@ -24,20 +27,18 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a new GSP tag library.
- * @goal create-tag-lib
- * @requiresProject false
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "create-tag-lib",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateTagLibMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the taglib to create.
-     *
-     * @parameter expression="${tagLibName}"
      */
+    @Parameter(property = "tagLibName")
     private String tagLibName;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateTagLib", tagLibName);
     }
