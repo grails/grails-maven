@@ -17,6 +17,9 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.grails.maven.plugin.tools.DefaultGrailsServices;
 
 /**
@@ -25,28 +28,24 @@ import org.grails.maven.plugin.tools.DefaultGrailsServices;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Executes an arbitrary Grails command.
- * @goal exec
- * @requiresProject false
- * @requiresDependencyResolution test
  * @since 0.4
  */
+@Mojo(name = "exec",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsExecMojo extends AbstractGrailsMojo {
 
     /**
      * Set this to name of the command you want to execute.
-     *
-     * @parameter expression="${command}"
-     * @required
      */
+    @Parameter(property = "command",required = true)
     private String command;
 
     /**
      * Set this to the arguments you want to pass to the command.
-     *
-     * @parameter expression="${args}"
      */
+    @Parameter(property = "args")
     private String args;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails(DefaultGrailsServices.getClassNameForLowerCaseHyphenSeparatedName(command), args);
     }

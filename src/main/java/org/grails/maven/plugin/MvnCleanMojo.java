@@ -17,6 +17,9 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Cleans a Grails project and jars in lib directory.
@@ -24,19 +27,12 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Cleans a Grails project and jars in lib directory.
- * @goal maven-clean
- * @phase clean
- * @requiresProject true
- * @requiresDependencyResolution
  * @since 0.1
  */
+@Mojo(name = "maven-clean", defaultPhase = LifecyclePhase.CLEAN)
 public class MvnCleanMojo extends AbstractGrailsMojo {
 
-    /**
-     * Executes the MvnWarMojo on the current project.
-     *
-     * @throws MojoExecutionException if an error occured while building the webapp
-     */
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Clean");
     }

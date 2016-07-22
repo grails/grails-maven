@@ -31,6 +31,10 @@ import java.util.regex.Pattern;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.grails.maven.plugin.tools.GrailsProject;
 import org.grails.maven.plugin.tools.GrailsServices;
 
@@ -43,27 +47,21 @@ import org.grails.maven.plugin.tools.GrailsServices;
  * @version $Id$
  * @description Creates a creates a maven 2 POM for on an existing Grails
  * project.
- * @goal create-pom
- * @requiresProject false
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "create-pom",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class CreatePomMojo extends AbstractGrailsMojo {
 
     /**
      * The Group Id of the project to be build.
-     *
-     * @parameter expression="${groupId}"
-     * @required
      */
+    @Parameter(required = true)
     private String groupId;
 
-    /**
-     * @component
-     * @readonly
-     */
+    @Component
     protected GrailsServices grailsServices;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         grailsServices.setBasedir(getBasedir());
         runGrails("CreatePom", this.groupId);

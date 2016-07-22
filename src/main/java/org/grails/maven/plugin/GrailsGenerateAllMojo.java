@@ -18,6 +18,9 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Generates a CRUD interface (controller + views) for a domain class.
@@ -26,20 +29,18 @@ import org.apache.maven.plugin.MojoFailureException;
  * @version $Id$
  * @description Generates a CRUD interface (controller + views) for a domain
  * class.
- * @goal generate-all
- * @requiresProject false
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "generate-all", requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsGenerateAllMojo extends AbstractGrailsMojo {
 
     /**
      * The name of the domain class to generate the CRUD interface.
-     *
-     * @parameter expression="${domainClass}"
      */
+    @Parameter(property = "domainClass")
     private String domainClassName;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("GenerateAll", domainClassName);
     }

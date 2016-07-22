@@ -17,6 +17,10 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Validate consistency between Grails and Maven settings.
@@ -24,31 +28,24 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Determines whether the current directory contains a Grails application or not, and creates one in the latter case.
- * @goal init
- * @phase initialize
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "init", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.INITIALIZE)
 public class MvnInitializeMojo extends AbstractGrailsMojo {
 
     /**
      * The artifact id of the project.
-     *
-     * @parameter expression="${project.artifactId}"
-     * @required
-     * @readonly
      */
+    @Parameter(name = "project.artifactId", required = true, readonly = true)
     private String artifactId;
 
     /**
      * The version id of the project.
-     *
-     * @parameter expression="${project.version}"
-     * @required
-     * @readonly
      */
+    @Parameter(name = "project.version", required = true, readonly = true)
     private String version;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             getGrailsServices().readProjectDescriptor();

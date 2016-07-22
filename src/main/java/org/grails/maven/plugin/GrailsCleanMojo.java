@@ -17,6 +17,8 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Cleans a Grails project.
@@ -24,13 +26,12 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Cleans a Grails project.
- * @goal clean
- * @requiresProject true
- * @requiresDependencyResolution runtime
  * @since 0.1
  */
+@Mojo(name = "clean", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCleanMojo extends AbstractGrailsMojo {
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Clean");
     }

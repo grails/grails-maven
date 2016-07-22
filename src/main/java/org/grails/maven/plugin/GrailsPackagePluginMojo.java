@@ -19,6 +19,11 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
 
@@ -28,41 +33,31 @@ import java.io.File;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Packages the Grails plugin.
- * @goal package-plugin
- * @phase package
- * @requiresProject true
- * @requiresDependencyResolution runtime
  * @since 0.4
  */
+@Mojo(name = "package-plugin", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsPackagePluginMojo extends AbstractGrailsMojo {
 
     /**
      * The artifact that this project produces.
      *
-     * @parameter expression="${project.artifact}"
-     * @required
-     * @readonly
      */
+    @Parameter(defaultValue = "${project.artifact}")
     private Artifact artifact;
 
     /**
      * The artifact handler.
-     *
-     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-plugin}"
-     * @required
-     * @readonly
      */
+    @Component(hint = "grails-plugin")
     protected ArtifactHandler artifactHandler;
 
     /**
      * The artifact handler.
-     *
-     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-binary-plugin}"
-     * @required
-     * @readonly
      */
+    @Component(hint = "grails-binary-plugin")
     protected ArtifactHandler binaryArtifactHandler;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // First package the plugin using the Grails script.
         runGrails("PackagePlugin");
