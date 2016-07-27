@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Runs a Grails application in Jetty.
@@ -26,16 +24,17 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Runs a Grails application in Jetty.
+ * @goal run-app
+ * @requiresProject true
+ * @requiresDependencyResolution runtime
  * @since 0.3
  */
-@Mojo(name = "run-app", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsRunAppMojo extends AbstractGrailsMojo {
 
     public GrailsRunAppMojo() {
         activateAgent = true;
     }
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("RunApp");
     }

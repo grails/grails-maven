@@ -17,10 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.grails.maven.plugin.tools.GrailsPluginProject;
 
 /**
@@ -29,24 +25,31 @@ import org.grails.maven.plugin.tools.GrailsPluginProject;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Validate consistency between Grails (*GrailsPlugin.groovy) and Maven (pom.xml) settings.
+ * @goal validate-plugin
+ * @phase validate
+ * @requiresDependencyResolution runtime
  * @since 1.0
  */
-@Mojo(name = "validate-plugin", requiresDependencyResolution = ResolutionScope.RUNTIME, defaultPhase = LifecyclePhase.VALIDATE)
 public class MvnPluginValidateMojo extends AbstractGrailsMojo {
 
     /**
      * The artifact id of the project.
+     *
+     * @parameter expression="${project.artifactId}"
+     * @required
+     * @readonly
      */
-    @Parameter(name = "project.artifactId", required = true, readonly = true)
     private String artifactId;
 
     /**
      * The version id of the project.
+     *
+     * @parameter expression="${project.version}"
+     * @required
+     * @readonly
      */
-    @Parameter(name = "project.version", required = true, readonly = true)
     private String version;
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         // Make sure that the artifactId starts with "grails-".
         //

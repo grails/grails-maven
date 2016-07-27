@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a WAR archive.
@@ -26,12 +24,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a WAR archive.
+ * @goal war
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.1
  */
-@Mojo(name = "war", requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsWarMojo extends AbstractGrailsMojo {
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if(getEnvironment() == null) {
             env = "prod";

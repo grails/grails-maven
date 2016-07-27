@@ -18,9 +18,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a Grails Gant Script.
@@ -28,18 +25,20 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a Grails Gant Script.
+ * @goal create-script
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.1
  */
-@Mojo(name = "create-script",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateScriptMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the script to create.
+     *
+     * @parameter expression="${scriptName}"
      */
-    @Parameter(property = "scriptName")
     private String scriptName;
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateScript", scriptName);
     }

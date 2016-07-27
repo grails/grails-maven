@@ -21,8 +21,6 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.*;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
@@ -75,31 +73,37 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     /**
      * Whether to activate the reloading agent (forked mode only) for this command
+	 *
+	 * @parameter expression="${activateAgent}"
      */
-    @Parameter(property = "activateAgent")
     protected boolean activateAgent;
     /**
      * The directory where is launched the mvn command.
+     *
+     * @parameter default-value="${basedir}"
+     * @required
      */
-    @Parameter(defaultValue = "${basedir}")
     protected File basedir;
 
     /**
      * The Grails environment to use.
+     *
+     * @parameter expression="${grails.env}"
      */
-    @Parameter(property = "grails.env")
     protected String env;
 
     /**
      * The Grails environment to use.
+     *
+     * @parameter expression="${environment}"
      */
-    @Parameter(property = "environment")
     protected String grailsEnv;
 
     /**
      * The Grails environment to use.
+     *
+     * @parameter expression="${grailsVersion}"
      */
-    @Parameter(property = "grailsVersion")
     protected String grailsVersion;
 
     /**
@@ -109,83 +113,104 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
 
     /**
      * The Grails work directory to use.
+     *
+     * @parameter expression="${grails.grailsWorkDir}" default-value="${project.build.directory}/work"
      */
-    @Parameter(property = "grails.grailsWorkDir", defaultValue = "${project.build.directory}/work")
     protected String grailsWorkDir;
 
     /**
      * Whether to run Grails in non-interactive mode or not. The default
      * is to run interactively, just like the Grails command-line.
+     *
+     * @parameter expression="${nonInteractive}" default-value="true"
+     * @required
      */
-    @Parameter(property = "nonInteractive", defaultValue = "true")
-    protected boolean nonInteractive;
+    protected boolean nonInteractive = true;
 
 	/**
 	 * Turns on/off stacktraces in the console output for Grails commands.
+	 *
+	 * @parameter expression="${showStacktrace}" default-value="false"
 	 */
-	@Parameter(property = "showStacktrace", defaultValue = "false")
 	protected boolean showStacktrace;
 
     /**
      * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${fork}" default-value="false"
      */
-    @Parameter(property = "fork", defaultValue = "false")
     protected boolean fork = false;
 
     /**
      * List of arguments passed to the forked VM
+     *
+     * @parameter
      */
-    @Parameter
     protected List forkedVmArgs;
 
     /**
      * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkDebug}" default-value="false"
      */
-    @Parameter(property = "forkDebug", defaultValue = "false")
-    protected boolean forkDebug;
+    protected boolean forkDebug = false;
 
     /**
      * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkPermGen}" default-value="256"
      */
-    @Parameter(property = "forkPermGen", defaultValue = "256")
-    protected int forkPermGen;
+    protected int forkPermGen = 256;
 
     /**
      * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkMaxMemory}" default-value="1024"
      */
-    @Parameter(property = "forkMaxMemory", defaultValue = "1024")
-    protected int forkMaxMemory;
+    protected int forkMaxMemory = 1024;
 
     /**
      * Whether the JVM is forked for executing Grails commands
+     *
+     * @parameter expression="${forkMinMemory}" default-value="512"
      */
-    @Parameter(property = "forkMinMemory", defaultValue = "512")
-    protected int forkMinMemory;
+    protected int forkMinMemory = 512;    
 
     /**
      * The directory where plugins are stored.
+     *
+     * @parameter expression="${pluginsDirectory}" default-value="${basedir}/plugins"
+     * @required
      */
-    @Parameter(property = "pluginsDirectory", defaultValue = "${basedir}/plugins")
     protected File pluginsDir;
 
 
     /**
      * The Maven settings reference.
+     *
+     * @parameter expression="${settings}"
+     * @required
+     * @readonly
      */
-    @Parameter(property = "settings")
     protected Settings settings;
 
     /**
      * POM
+     *
+     * @parameter expression="${project}"
+     * @readonly
+     * @required
      */
-    @Parameter(property = "project")
     protected MavenProject project;
 
 
     /**
      * The current repository/network configuration of Maven.
+     *
+     * @parameter expression="${localRepository}"
+     * @required
+     * @readonly
      */
-    @Parameter(property = "localRepository")
     private ArtifactRepository localRepository;
 
     /**
@@ -194,16 +219,18 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      *
      * INTERNAL This parameter is not meant to be used externally.  It is used by IDEs
      * that require extra classpath entries to execute grails commands.
+     *
+     * @parameter
      */
-    @Parameter
     private String extraClasspathEntries;
 
 
     /**
      * Fully qualified classname of a grails build listener to attach
      * to the Grails command
+     *
+     * @parameter
      */
-    @Parameter
     private String grailsBuildListener;
 
     /**
@@ -212,42 +239,51 @@ public abstract class AbstractGrailsMojo extends AbstractMojo {
      * INTERNAL This parameter is not meant to be used externally. This parameter is used by
      * IDEs to generate project dependency information during builds.
      */
-    @Parameter
     private String dependencyFileLocation;
 
 
-    @Component
+    /**
+     * @component
+     * @readonly
+     */
     private GrailsServices grailsServices;
 
     /**
      * Utility for resolving dependencies from Maven
+     *
+     * @component
      */
-    @Component
     private ProjectDependenciesResolver projectDependenciesResolver;
 
     /**
      * The entry point to Aether, i.e. the component doing all the work.
+     *
+     * @component
      */
-    @Component
     private RepositorySystem repoSystem;
 
 
     /**
      * For building metadata about projects
+     *
+     * @component
      */
-    @Component
     private ProjectBuilder projectBuilder;
 
     /**
      * The current repository/network configuration of Maven.
+     *
+     * @parameter default-value="${repositorySystemSession}"
+     * @readonly
      */
-    @Parameter(defaultValue = "${repositorySystemSession}")
     private RepositorySystemSession repoSession;
 
     /**
      * The project's remote repositories to use for the resolution of plugins and their dependencies.
+     *
+     * @parameter default-value="${project.remoteProjectRepositories}"
+     * @readonly
      */
-    @Parameter(defaultValue = "${project.remoteProjectRepositories}")
     private List<RemoteRepository> remoteRepos;
 
 

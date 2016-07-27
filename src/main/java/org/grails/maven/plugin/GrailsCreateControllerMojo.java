@@ -22,9 +22,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a new controller.
@@ -32,18 +29,19 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a new controller.
+ * @goal create-controller
+ * @requiresDependencyResolution runtime
  * @since 0.1
  */
-@Mojo(name = "create-controller", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateControllerMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the controller to create.
+     *
+     * @parameter expression="${controllerName}"
      */
-    @Parameter(property = "controllerName")
     private String controllerName;
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateController", this.controllerName);
     }

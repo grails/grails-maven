@@ -18,9 +18,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a new service class.
@@ -28,18 +25,20 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a new service class.
+ * @goal create-service
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.1
  */
-@Mojo(name = "create-service",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateServiceMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the service to create.
+     *
+     * @parameter expression="${serviceName}"
      */
-    @Parameter(property = "serviceName")
     private String serviceName;
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateService", serviceName);
     }

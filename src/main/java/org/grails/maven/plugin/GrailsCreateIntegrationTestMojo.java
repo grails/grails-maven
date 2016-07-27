@@ -18,9 +18,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a new Grails integration test which loads the whole Grails
@@ -31,18 +28,20 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  *          ahe $
  * @description Creates a new Grails integration test which loads the whole
  * Grails environment when run.
+ * @goal create-integration-test
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.1
  */
-@Mojo(name = "create-integration-test",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsCreateIntegrationTestMojo extends AbstractGrailsMojo {
 
     /**
      * The name for the unit test to create.
+     *
+     * @parameter expression="${integrationTestName}"
      */
-    @Parameter(property = "integrationTestName")
     private String integrationTestName;
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("CreateIntegrationTest", integrationTestName);
     }

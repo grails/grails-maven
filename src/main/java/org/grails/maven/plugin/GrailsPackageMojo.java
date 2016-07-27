@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Packages the Grails application into the web-app folder for running.
@@ -27,12 +25,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @version $Id$
  * @description Packages the Grails application into the web-app folder for
  * running.
+ * @goal package
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.2
  */
-@Mojo(name = "package", requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsPackageMojo extends AbstractGrailsMojo {
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Package");
     }

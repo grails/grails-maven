@@ -19,7 +19,6 @@ import groovy.lang.GroovyClassLoader;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.groovy.grails.plugins.AstPluginDescriptorReader;
 import org.codehaus.groovy.grails.plugins.GrailsPluginInfo;
-import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.util.IOUtil;
 
@@ -30,9 +29,9 @@ import java.util.Properties;
 /**
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
+ * @plexus.component role="org.grails.maven.plugin.tools.GrailsServices"
  * @since 0.1
  */
-@Component(role = GrailsServices.class)
 public class DefaultGrailsServices extends AbstractLogEnabled implements GrailsServices {
 
     private static final String FILE_SUFFIX = "GrailsPlugin.groovy";

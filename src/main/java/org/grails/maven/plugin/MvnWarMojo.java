@@ -20,9 +20,6 @@ import java.io.File;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a WAR archive for the project and puts it in the usual Maven
@@ -31,15 +28,22 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Creates a WAR archive and register it in maven.
+ * @goal maven-war
+ * @phase package
+ * @requiresDependencyResolution
  * @since 0.1
  */
-@Mojo(name = "maven-war", defaultPhase = LifecyclePhase.PACKAGE)
 public class MvnWarMojo extends AbstractGrailsMojo {
-
     protected File warFile;
 
-    @Override
+    /**
+     * Executes the MvnWarMojo on the current project.
+     *
+     * @throws MojoExecutionException if an error occured while building the webapp
+     */
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+
         Build build = project.getBuild();
         String warFileName = build.getFinalName() != null ? build.getFinalName() : project.getArtifactId() + "-" + project.getVersion();
         if(!warFileName.endsWith(".war")) {
