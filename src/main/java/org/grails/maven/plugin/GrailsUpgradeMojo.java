@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Upgrades a Grails application to the version of this plugin.
@@ -26,12 +24,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author Jonathan Pearlin
  * @version $Id$
  * @description Upgrades a Grails application.
+ * @goal upgrade
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 1.3.7
  */
-@Mojo(name = "upgrade", requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsUpgradeMojo extends AbstractGrailsMojo {
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Upgrade");
     }

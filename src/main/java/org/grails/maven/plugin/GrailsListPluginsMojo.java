@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Lists the available plugins.
@@ -26,12 +24,12 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author Peter Ledbrook
  * @version $Id$
  * @description Lists the available plugins.
+ * @goal list-plugins
+ * @requiresProject false
+ * @requiresDependencyResolution runtime
  * @since 0.4
  */
-@Mojo(name = "list-plugins",requiresProject = false, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsListPluginsMojo extends AbstractGrailsMojo {
-
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("ListPlugins");
     }

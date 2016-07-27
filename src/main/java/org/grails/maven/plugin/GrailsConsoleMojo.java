@@ -17,8 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Runs a Grails console inside the current project.
@@ -26,12 +24,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author Peter Ledbrook
  * @version $Id$
  * @description Runs a Grails console inside the current project.
+ * @goal console
+ * @requiresProject true
+ * @requiresDependencyResolution runtime
  * @since 1.0
  */
-@Mojo(name = "console", requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class GrailsConsoleMojo extends AbstractGrailsMojo {
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Console");
     }

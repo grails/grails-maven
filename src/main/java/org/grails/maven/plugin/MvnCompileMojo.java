@@ -17,9 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Compiles a Grails project.
@@ -27,12 +24,19 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Compiles a Grails project.
+ * @goal maven-compile
+ * @phase compile
+ * @requiresProject true
+ * @requiresDependencyResolution
  * @since 0.1
  */
-@Mojo(name = "maven-compile", defaultPhase = LifecyclePhase.COMPILE)
 public class MvnCompileMojo extends AbstractGrailsMojo {
 
-  @Override
+    /**
+     * Executes the MvnWarMojo on the current project.
+     *
+     * @throws org.apache.maven.plugin.MojoExecutionException if an error occured while building the webapp
+     */
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("Compile");
     }

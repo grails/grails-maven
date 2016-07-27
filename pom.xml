@@ -45,7 +45,7 @@
 
     <properties>
         <!-- Prerequisites -->
-        <maven.version>3.3.9</maven.version>
+        <maven.version>3.1.0</maven.version>
 
         <!-- Dependencies -->
         <groovy.version>2.4.4</groovy.version>
@@ -54,16 +54,13 @@
         <aether.version>1.0.0.v20140518</aether.version>
         <maven-model.version>${maven.version}</maven-model.version>
         <maven-plugin-api.version>${maven.version}</maven-plugin-api.version>
-        <maven-project.version>3.3.9</maven-project.version>
+        <maven-project.version>2.2.1</maven-project.version>
         <maven-archiver.version>2.2</maven-archiver.version>
-        <plexus-utils.version>3.0.24</plexus-utils.version>
+        <plexus-utils.version>1.4.5</plexus-utils.version>
         <junit.version>4.11</junit.version>
-        <maven-plugin-testing-harness.version>3.3.9</maven-plugin-testing-harness.version>
-        <maven.plugin.annotations.version>3.4</maven.plugin.annotations.version>
+        <maven-plugin-testing-harness.version>3.1.0</maven-plugin-testing-harness.version>
         <xmlunit.version>1.0</xmlunit.version>
         <spock.version>0.7-groovy-2.0</spock.version>
-        <plexus-component-annotations.version>1.6</plexus-component-annotations.version>
-        <maven-compat.version>3.1.0</maven-compat.version>
     </properties>
 
     <prerequisites>
@@ -189,20 +186,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-component-annotations</artifactId>
-            <version>${plexus-component-annotations.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-annotations</artifactId>
-            <version>${maven.plugin.annotations.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -219,7 +202,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-compat</artifactId>
-            <version>${maven-compat.version}</version>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -250,6 +233,9 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+
+
     </dependencies>
 
     <build>
@@ -321,31 +307,43 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.3</version>
                 <executions>
-                    <execution>
-                        <id>default-descriptor</id>
-                        <phase>process-classes</phase>
-                    </execution>
                     <execution>
                         <id>generated-helpmojo</id>
                         <goals>
                             <goal>helpmojo</goal>
                         </goals>
-                        <phase>process-classes</phase>
                     </execution>
                 </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-component-metadata</artifactId>
-                <version>1.7</version>
+                <artifactId>plexus-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>generate</id>
                         <goals>
-                            <goal>generate-metadata</goal>
+                            <goal>descriptor</goal>
                         </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-resources/plexus</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>merge</id>
+                        <goals>
+                            <goal>merge-descriptors</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>
+                                    ${project.build.directory}/generated-resources/plexus/META-INF/plexus/components.xml
+                                </descriptor>
+                            </descriptors>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

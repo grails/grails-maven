@@ -17,9 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Runs a Grails applications unit tests and integration tests.
@@ -27,21 +24,24 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:aheritier@gmail.com">Arnaud HERITIER</a>
  * @version $Id$
  * @description Runs a Grails applications unit tests and integration tests.
+ * @goal test-app
+ * @requiresProject false
+ * @requiresDependencyResolution test
  * @since 0.1
  */
-@Mojo(name = "test-app", requiresProject = false, requiresDependencyResolution = ResolutionScope.TEST)
 public class GrailsTestAppMojo extends AbstractGrailsMojo {
 
 	/**
 	 *  The space-separated list of test classes to run (e.g. *Controller)
+	 *
+	 * @parameter expression="${testPatterns}"
 	 */
-	@Parameter(property = "testPatterns")
 	private String testPatterns;
-
 	/**
 	 * The space-separated list of test types or phases (e.g unit: :spock)
+	 *
+	 * @parameter expression="${testTypesAndPhases}"
 	 */
-	@Parameter(property = "testTypesAndPhases")
 	private String testTypesAndPhases;
 
 	@Override

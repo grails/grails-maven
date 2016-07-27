@@ -5,10 +5,6 @@ import org.apache.maven.artifact.handler.ArtifactHandler;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 
 import java.io.File;
@@ -19,25 +15,37 @@ import java.io.File;
  * @author Dirk Sigurdson
  * @version $Id$
  * @description Creates a jetty JAR archive and register it in maven.
+ * @goal maven-grails-standalone-jetty
+ * @phase package
+ * @requiresDependencyResolution
  * @since 1.1
  */
-@Mojo(name = "maven-grails-standalone-jetty", defaultPhase = LifecyclePhase.PACKAGE)
 public class MvnGrailsStandaloneJettyMojo extends AbstractGrailsMojo {
     protected File jarFile;
 
     /**
      * The maven artifact.
+     *
+     * @parameter expression="${project.artifact}"
+     * @required
+     * @readonly
      */
-    @Component
     private Artifact artifact;
 
     /**
      * The artifact handler.
+     *
+     * @parameter expression="${component.org.apache.maven.artifact.handler.ArtifactHandler#grails-app}"
+     * @required
+     * @readonly
      */
-    @Component(hint = "grails-app")
     private ArtifactHandler artifactHandler;
 
-    @Override
+    /**
+     * Executes the MvnGrailsStandaloneJettyMojo on the current project.
+     *
+     * @throws MojoExecutionException if an error occured while building the webapp
+     */
     public void execute() throws MojoExecutionException, MojoFailureException {
 
 

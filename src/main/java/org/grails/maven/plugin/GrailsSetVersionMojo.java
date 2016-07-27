@@ -17,9 +17,6 @@ package org.grails.maven.plugin;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Set the grails application version from the Maven POM version.
@@ -27,12 +24,14 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
  * @author <a href="mailto:michael.lawler@selera.com">Michael Lawler</a>
  * @version $Id$
  * @description Set the grails application version from the Maven POM version.
+ * @goal set-version
+ * @phase validate
+ * @requiresProject true
+ * @requiresDependencyResolution
  * @since 1.2.1
  */
-@Mojo(name = "set-version", defaultPhase = LifecyclePhase.VALIDATE)
 public class GrailsSetVersionMojo extends AbstractGrailsMojo {
 
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         runGrails("SetVersion", project.getVersion());
     }
