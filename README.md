@@ -22,7 +22,7 @@ This is the Maven plugin for Grails. It provides the following Maven goals:
     grails:run-app
     grails:run-app-https
 
-As well as hooks into the normal Maven lifecyle like `compile`, `package` and `test` for Grails applications. 
+As well as hooks into the normal Maven lifecycle like `compile`, `package` and `test` for Grails applications. 
 
 You can create an example POM with any Grails application by doing:
 
