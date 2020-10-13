@@ -57,7 +57,7 @@
         <maven-project.version>2.2.1</maven-project.version>
         <maven-archiver.version>2.2</maven-archiver.version>
         <plexus-utils.version>1.4.5</plexus-utils.version>
-        <junit.version>4.11</junit.version>
+        <junit.version>4.13.1</junit.version>
         <maven-plugin-testing-harness.version>3.1.0</maven-plugin-testing-harness.version>
         <xmlunit.version>1.0</xmlunit.version>
         <spock.version>0.7-groovy-2.0</spock.version>
