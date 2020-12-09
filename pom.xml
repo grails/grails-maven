@@ -48,7 +48,7 @@
         <maven.version>3.1.0</maven.version>
 
         <!-- Dependencies -->
-        <groovy.version>2.4.4</groovy.version>
+        <groovy.version>2.4.21</groovy.version>
         <grails.version>2.5.1</grails.version>
         <grails-launcher.version>1.0.5</grails-launcher.version>
         <aether.version>1.0.0.v20140518</aether.version>
